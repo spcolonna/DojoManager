@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:grand_dojo/core/constants/app_colors.dart';
 import 'package:grand_dojo/core/utils/l10n_helper.dart';
+import '../../../core/providers/dojo_provider.dart';
 import '../dojo/dojo_screen.dart';
 import '../settings/settings_screen.dart';
 import '../training/training_screen.dart';
@@ -19,193 +21,563 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  static const int _week            = 1;
-  static const int _season          = 1;
-  static const int _md              = 150;
-  static const int _gm              = 0;
-  static const int _unreadMessages  = 1;
+  int _selectedIndex = 0;
 
-  void _navigate(BuildContext context, Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => screen),
-    );
-  }
+  static const int _week           = 1;
+  static const int _season         = 1;
+  static const int _md             = 150;
+  static const int _gm             = 0;
+  static const int _unreadMessages = 1;
 
   @override
   Widget build(BuildContext context) {
+    final loc = l10n(context);
+
+    final screens = [
+      const _DojoHome(),
+      const TrainingScreen(),
+      const TournamentScreen(),
+      const StudentsScreen(),
+      const ShopScreen(),
+    ];
+
+    final navItems = [
+      _NavItem(label: loc.navDojo,       icon: Icons.home_work_rounded),
+      _NavItem(label: loc.navTraining,   icon: Icons.fitness_center_rounded),
+      _NavItem(label: loc.navTournament, icon: Icons.emoji_events_rounded),
+      _NavItem(label: loc.navStudents,   icon: Icons.people_rounded),
+      _NavItem(label: loc.navShop,       icon: Icons.diamond_rounded),
+    ];
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0C12),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _Header(
-              week: _week,
-              season: _season,
-              md: _md,
-              gm: _gm,
-              unreadMessages: _unreadMessages,
-              onMessagesTap: () => _navigate(context, const MessagesScreen()),
-              onSettingsTap: () => _navigate(context, const SettingsScreen()),
+      backgroundColor: AppColors.bgDeep,
+      body: Column(
+        children: [
+          // ── TOP BAR ─────────────────────────────────────────────────────
+          Container(
+            decoration: const BoxDecoration(
+              gradient: AppColors.gradientHeader,
+              border: Border(
+                bottom: BorderSide(color: AppColors.bgDivider, width: 1),
+              ),
             ),
-            Expanded(
+            child: SafeArea(
+              bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: _NavGrid(
-                  onTap: (screen) => _navigate(context, screen),
+                padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.appName,
+                          style: GoogleFonts.cinzelDecorative(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.goldLight,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          loc.dashboardWeekLabel(_week, _season),
+                          style: GoogleFonts.rajdhani(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    _CurrencyChip(
+                      icon: Icons.monetization_on_rounded,
+                      value: _md,
+                      color: AppColors.goldLight,
+                      bgColor: AppColors.goldMuted,
+                      label: loc.currencyMDShort,
+                    ),
+                    const SizedBox(width: 8),
+                    _CurrencyChip(
+                      icon: Icons.diamond_rounded,
+                      value: _gm,
+                      color: AppColors.infoLight,
+                      bgColor: AppColors.infoBg,
+                      label: loc.currencyGMShort,
+                    ),
+                    const SizedBox(width: 4),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => const MessagesScreen()),
+                          ),
+                          icon: const Icon(Icons.notifications_rounded,
+                              color: AppColors.textSecondary, size: 24),
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
+                        ),
+                        if (_unreadMessages > 0)
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppColors.redLight,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const SettingsScreen()),
+                      ),
+                      icon: const Icon(Icons.settings_rounded,
+                          color: AppColors.textSecondary, size: 24),
+                      padding: const EdgeInsets.all(8),
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
+
+          // ── BODY ────────────────────────────────────────────────────────
+          Expanded(child: screens[_selectedIndex]),
+        ],
+      ),
+
+      // ── BOTTOM NAV ──────────────────────────────────────────────────────
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.bgSurface,
+          border: const Border(
+            top: BorderSide(color: AppColors.bgDivider, width: 1),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
           ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              children: List.generate(navItems.length, (i) {
+                final item       = navItems[i];
+                final isSelected = i == _selectedIndex;
+
+                return Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => setState(() => _selectedIndex = i),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.goldPrimary.withOpacity(0.15)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            item.icon,
+                            size: 22,
+                            color: isSelected
+                                ? AppColors.goldLight
+                                : AppColors.textTertiary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          item.label,
+                          style: GoogleFonts.rajdhani(
+                            fontSize: 10,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: isSelected
+                                ? AppColors.goldLight
+                                : AppColors.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-// ─── HEADER ──────────────────────────────────────────────────────────────────
+// ─── DOJO HOME ───────────────────────────────────────────────────────────────
 
-class _Header extends StatelessWidget {
-  final int week, season, md, gm, unreadMessages;
-  final VoidCallback onMessagesTap;
-  final VoidCallback onSettingsTap;
-
-  const _Header({
-    required this.week,
-    required this.season,
-    required this.md,
-    required this.gm,
-    required this.unreadMessages,
-    required this.onMessagesTap,
-    required this.onSettingsTap,
-  });
+class _DojoHome extends ConsumerWidget {
+  const _DojoHome();
 
   @override
-  Widget build(BuildContext context) {
-    final loc = l10n(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc          = l10n(context);
+    final dojoAsync    = ref.watch(dojoProvider);
+    final studentsAsync = ref.watch(studentsProvider);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: const BoxDecoration(
-        color: Color(0xFF141824),
-        border: Border(
-          bottom: BorderSide(color: Color(0xFF2A3048), width: 1),
-        ),
-      ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                loc.appName,
-                style: GoogleFonts.cinzelDecorative(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFFC9A84C),
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const Spacer(),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  IconButton(
-                    onPressed: onMessagesTap,
-                    icon: const Icon(
-                      Icons.mail_outline,
-                      color: Color(0xFF9099B0),
-                      size: 22,
+          const SizedBox(height: 4),
+
+          // ── Banner del dojo ──────────────────────────────────────────
+          dojoAsync.when(
+            loading: () => _DojoBannerSkeleton(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (dojo) {
+              if (dojo == null) return const SizedBox.shrink();
+
+              final styleName  = _styleDisplayName(dojo.styleId, loc);
+              final styleColor = AppColors.colorByStyle[dojo.styleId] ??
+                  AppColors.goldPrimary;
+              final slotsUsed  = studentsAsync.valueOrNull?.length ?? 0;
+
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: AppColors.gradientDojo,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.goldDark, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.goldPrimary.withOpacity(0.12),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
                     ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  if (unreadMessages > 0)
-                    Positioned(
-                      top: -2,
-                      right: -2,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFC0392B),
-                          shape: BoxShape.circle,
-                        ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: styleColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: styleColor.withOpacity(0.5)),
+                      ),
+                      child: Icon(Icons.home_work_rounded,
+                          color: styleColor, size: 32),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            dojo.name,
+                            style: GoogleFonts.cinzelDecorative(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.goldLight,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Level ${dojo.level} · $styleName',
+                            style: GoogleFonts.rajdhani(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: slotsUsed / dojo.maxStudentSlots,
+                              minHeight: 6,
+                              backgroundColor: AppColors.bgDivider,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  styleColor),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$slotsUsed / ${dojo.maxStudentSlots} students',
+                            style: GoogleFonts.rajdhani(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(width: 16),
-              IconButton(
-                onPressed: onSettingsTap,
-                icon: const Icon(
-                  Icons.tune,
-                  color: Color(0xFF9099B0),
-                  size: 22,
+                  ],
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
+              );
+            },
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Quick access ─────────────────────────────────────────────
+          Text(
+            'QUICK ACCESS',
+            style: GoogleFonts.rajdhani(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+              letterSpacing: 1.5,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Text(
-                loc.dashboardWeekLabel(week, season),
-                style: GoogleFonts.rajdhani(
-                  fontSize: 13,
-                  color: const Color(0xFF9099B0),
-                  letterSpacing: 0.5,
+              Expanded(
+                child: _QuickCard(
+                  title: loc.navMarket,
+                  icon: Icons.storefront_rounded,
+                  gradient: AppColors.gradientMarket,
+                  iconColor: AppColors.purpleLight,
+                  borderColor: AppColors.purple,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const MarketScreen()),
+                  ),
                 ),
               ),
-              const Spacer(),
-              _CurrencyChip(
-                icon: Icons.monetization_on_outlined,
-                value: md,
-                color: const Color(0xFFC9A84C),
-                label: loc.currencyMDShort,
-              ),
               const SizedBox(width: 12),
-              _CurrencyChip(
-                icon: Icons.diamond_outlined,
-                value: gm,
-                color: const Color(0xFF2980B9),
-                label: loc.currencyGMShort,
+              Expanded(
+                child: _QuickCard(
+                  title: loc.navDojo,
+                  icon: Icons.construction_rounded,
+                  gradient: AppColors.gradientUpgrades,
+                  iconColor: AppColors.successLight,
+                  borderColor: AppColors.successBorder,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const DojoScreen()),
+                  ),
+                ),
               ),
             ],
           ),
+
+          const SizedBox(height: 20),
+
+          // ── Estudiantes ──────────────────────────────────────────────
+          Text(
+            'MY STUDENTS',
+            style: GoogleFonts.rajdhani(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          studentsAsync.when(
+            loading: () => Column(
+              children: [
+                _StudentCardSkeleton(),
+                const SizedBox(height: 10),
+                _StudentCardSkeleton(),
+              ],
+            ),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (students) {
+              if (students.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No students yet',
+                    style: GoogleFonts.rajdhani(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                );
+              }
+              return Column(
+                children: students.map((s) {
+                  final beltColor = AppColors.beltColorByLevel[s.belt.level]
+                      ?? AppColors.beltWhite;
+                  final xpRequired = s.belt.xpRequiredForNextLevel;
+                  final xpPercent  = xpRequired > 0
+                      ? s.currentXP / xpRequired
+                      : 0.0;
+                  final styleColor = AppColors.colorByStyle[s.styleId]
+                      ?? AppColors.goldPrimary;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _StudentPreviewCard(
+                      name: s.nameKey,
+                      styleId: s.styleId,
+                      styleColor: styleColor,
+                      belt: s.belt.titleKey,
+                      beltColor: beltColor,
+                      xpPercent: xpPercent.clamp(0.0, 1.0),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Próximo torneo ───────────────────────────────────────────
+          Text(
+            'NEXT TOURNAMENT',
+            style: GoogleFonts.rajdhani(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: AppColors.gradientTournament,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                  color: AppColors.redAction.withOpacity(0.5)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.redAction.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.emoji_events_rounded,
+                      color: AppColors.redLight, size: 26),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Weekly League',
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        'Saturday · White Belt division',
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.redAction,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'ENROLL',
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
+
+  String _styleDisplayName(String id, dynamic loc) => switch (id) {
+    'kung_fu'   => loc.styleKungFu,
+    'karate'    => loc.styleKarate,
+    'taekwondo' => loc.styleTaekwondo,
+    'judo'      => loc.styleJudo,
+    'muay_thai' => loc.styleMuayThai,
+    'bjj'       => loc.styleBjj,
+    'boxing'    => loc.styleBoxing,
+    'mma'       => loc.styleMma,
+    _           => id,
+  };
+}
+
+// ─── WIDGETS ─────────────────────────────────────────────────────────────────
+
+class _NavItem {
+  final String label;
+  final IconData icon;
+  const _NavItem({required this.label, required this.icon});
 }
 
 class _CurrencyChip extends StatelessWidget {
   final IconData icon;
   final int value;
   final Color color;
+  final Color bgColor;
   final String label;
 
   const _CurrencyChip({
     required this.icon,
     required this.value,
     required this.color,
+    required this.bgColor,
     required this.label,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C2235),
+        color: bgColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2A3048)),
+        border: Border.all(color: color.withOpacity(0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 14),
-          const SizedBox(width: 4),
+          Icon(icon, color: color, size: 13),
+          const SizedBox(width: 3),
           Text(
             '$value',
             style: GoogleFonts.rajdhani(
@@ -220,125 +592,216 @@ class _CurrencyChip extends StatelessWidget {
   }
 }
 
-// ─── NAV GRID ────────────────────────────────────────────────────────────────
-
-class _NavGrid extends StatelessWidget {
-  final void Function(Widget screen) onTap;
-
-  const _NavGrid({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final loc   = l10n(context);
-    final items = [
-      _NavItem(
-        label: loc.navDojo,
-        icon: Icons.home_work_outlined,
-        color: const Color(0xFFC9A84C),
-        screen: const DojoScreen(),
-      ),
-      _NavItem(
-        label: loc.navTraining,
-        icon: Icons.fitness_center,
-        color: const Color(0xFFE87020),
-        screen: const TrainingScreen(),
-      ),
-      _NavItem(
-        label: loc.navTournament,
-        icon: Icons.emoji_events_outlined,
-        color: const Color(0xFFC0392B),
-        screen: const TournamentScreen(),
-      ),
-      _NavItem(
-        label: loc.navStudents,
-        icon: Icons.people_outline,
-        color: const Color(0xFF27AE60),
-        screen: const StudentsScreen(),
-      ),
-      _NavItem(
-        label: loc.navMarket,
-        icon: Icons.storefront_outlined,
-        color: const Color(0xFF8E44AD),
-        screen: const MarketScreen(),
-      ),
-      _NavItem(
-        label: loc.navShop,
-        icon: Icons.diamond_outlined,
-        color: const Color(0xFF2980B9),
-        screen: const ShopScreen(),
-      ),
-    ];
-
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.1,
-      ),
-      itemCount: items.length,
-      itemBuilder: (_, i) => _NavCard(
-        item: items[i],
-        onTap: () => onTap(items[i].screen),
-      ),
-    );
-  }
-}
-
-class _NavItem {
-  final String label;
+class _QuickCard extends StatelessWidget {
+  final String title;
   final IconData icon;
-  final Color color;
-  final Widget screen;
-
-  const _NavItem({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.screen,
-  });
-}
-
-class _NavCard extends StatelessWidget {
-  final _NavItem item;
+  final LinearGradient gradient;
+  final Color iconColor;
+  final Color borderColor;
   final VoidCallback onTap;
 
-  const _NavCard({required this.item, required this.onTap});
+  const _QuickCard({
+    required this.title,
+    required this.icon,
+    required this.gradient,
+    required this.iconColor,
+    required this.borderColor,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF141824),
+          gradient: gradient,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF2A3048)),
+          border: Border.all(color: borderColor.withOpacity(0.5)),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: item.color.withOpacity(0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(item.icon, color: item.color, size: 26),
-            ),
-            const SizedBox(height: 12),
+            Icon(icon, color: iconColor, size: 22),
+            const SizedBox(width: 10),
             Text(
-              item.label,
+              title,
               style: GoogleFonts.rajdhani(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFFF0F0F0),
-                letterSpacing: 0.5,
+                color: AppColors.textPrimary,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StudentPreviewCard extends StatelessWidget {
+  final String name;
+  final String styleId;
+  final Color styleColor;
+  final String belt;
+  final Color beltColor;
+  final double xpPercent;
+
+  const _StudentPreviewCard({
+    required this.name,
+    required this.styleId,
+    required this.styleColor,
+    required this.belt,
+    required this.beltColor,
+    required this.xpPercent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = l10n(context);
+
+    final styleDisplay = switch (styleId) {
+      'kung_fu'   => loc.styleKungFu,
+      'karate'    => loc.styleKarate,
+      'taekwondo' => loc.styleTaekwondo,
+      'judo'      => loc.styleJudo,
+      'muay_thai' => loc.styleMuayThai,
+      'bjj'       => loc.styleBjj,
+      'boxing'    => loc.styleBoxing,
+      'mma'       => loc.styleMma,
+      _           => styleId,
+    };
+
+    final beltDisplay = switch (belt) {
+      'belt_white'     => loc.beltWhite,
+      'belt_yellow'    => loc.beltYellow,
+      'belt_orange'    => loc.beltOrange,
+      'belt_green'     => loc.beltGreen,
+      'belt_blue'      => loc.beltBlue,
+      'belt_purple'    => loc.beltPurple,
+      'belt_brown'     => loc.beltBrown,
+      'belt_red'       => loc.beltRed,
+      'belt_red_black' => loc.beltRedBlack,
+      'belt_black'     => loc.beltBlack,
+      _                => belt,
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.bgSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bgDivider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: styleColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: styleColor.withOpacity(0.3)),
+            ),
+            child: Icon(Icons.person_rounded,
+                color: styleColor, size: 26),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: beltColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.2), width: 1),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      beltDisplay,
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 11,
+                        color: beltColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  styleDisplay,
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: xpPercent,
+                    minHeight: 4,
+                    backgroundColor: AppColors.bgDivider,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.success),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Icon(Icons.chevron_right_rounded,
+              color: AppColors.disabled, size: 20),
+        ],
+      ),
+    );
+  }
+}
+
+class _DojoBannerSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: AppColors.bgSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.bgDivider),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.goldPrimary,
+          strokeWidth: 2,
+        ),
+      ),
+    );
+  }
+}
+
+class _StudentCardSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: AppColors.bgSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.bgDivider),
       ),
     );
   }

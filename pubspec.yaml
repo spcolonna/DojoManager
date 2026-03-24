@@ -1,0 +1,83 @@
+name: grand_dojo
+description: Grand Dojo - Martial Arts Manager
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  riverpod: ^2.5.1
+  flutter_riverpod: ^2.5.1
+
+  # Firebase
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.6.12
+  #firebase_analytics: ^10.10.7
+
+  # Monetization
+  #purchases_flutter: ^6.29.1   # RevenueCat
+
+  # Navigation
+  go_router: ^14.2.7
+
+  # UI
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  lottie: ^3.1.2
+  shimmer: ^3.0.0
+
+  # Utils
+  intl: ^0.20.2
+  shared_preferences: ^2.3.1
+  uuid: ^4.4.2
+  equatable: ^2.0.5
+  dartz: ^0.10.1             # Either / Option for domain layer
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  riverpod_generator: ^2.4.2
+
+flutter:
+  generate: true   # Activa la generación de l10n
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/backgrounds/
+    - assets/images/dojos/
+    - assets/images/students/
+    - assets/images/belts/
+    - assets/images/ui/
+    - assets/icons/styles/
+    - assets/icons/navigation/
+    - assets/icons/strategies/
+    - assets/animations/lottie/
+
+  fonts:
+    - family: CinzelDecorative
+      fonts:
+        - asset: assets/fonts/CinzelDecorative-Regular.ttf
+        - asset: assets/fonts/CinzelDecorative-Bold.ttf
+          weight: 700
+    - family: Rajdhani
+      fonts:
+        - asset: assets/fonts/Rajdhani-Regular.ttf
+        - asset: assets/fonts/Rajdhani-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Rajdhani-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Rajdhani-Bold.ttf
+          weight: 700

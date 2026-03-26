@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/belt_helper.dart';
 import '../../../../core/utils/l10n_helper.dart';
 
 class StudentPreviewCard extends StatelessWidget {
@@ -26,31 +27,8 @@ class StudentPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = l10n(context);
 
-    final styleDisplay = switch (styleId) {
-      'kung_fu'   => loc.styleKungFu,
-      'karate'    => loc.styleKarate,
-      'taekwondo' => loc.styleTaekwondo,
-      'judo'      => loc.styleJudo,
-      'muay_thai' => loc.styleMuayThai,
-      'bjj'       => loc.styleBjj,
-      'boxing'    => loc.styleBoxing,
-      'mma'       => loc.styleMma,
-      _           => styleId,
-    };
-
-    final beltDisplay = switch (belt) {
-      'belt_white'     => loc.beltWhite,
-      'belt_yellow'    => loc.beltYellow,
-      'belt_orange'    => loc.beltOrange,
-      'belt_green'     => loc.beltGreen,
-      'belt_blue'      => loc.beltBlue,
-      'belt_purple'    => loc.beltPurple,
-      'belt_brown'     => loc.beltBrown,
-      'belt_red'       => loc.beltRed,
-      'belt_red_black' => loc.beltRedBlack,
-      'belt_black'     => loc.beltBlack,
-      _                => belt,
-    };
+    final styleDisplay = styleDisplayName(styleId, loc);
+    final beltDisplay  = beltDisplayName(belt, loc);
 
     return Container(
       padding: const EdgeInsets.all(14),

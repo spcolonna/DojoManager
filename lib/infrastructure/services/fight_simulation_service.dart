@@ -2,11 +2,10 @@ import 'dart:math';
 import '../../domain/entities/fight.dart';
 import '../../domain/entities/student.dart';
 import '../../core/config/fight_config.dart';
+import '../../core/config/fight_strategy_config.dart';
 
-/// Simulación de peleas - corre 100% local, sin red.
-/// Seed determinista por combate → replay reproducible.
 class FightSimulationService {
-  
+
   FightResult simulateFight({
     required Student blue,
     required Student red,
@@ -22,8 +21,19 @@ class FightSimulationService {
     final rounds = <FightRoundResult>[];
     final events = <FightEvent>[];
 
-    final blueVsRedMod = FightConfig.styleMatchupModifiers[blue.styleId]?[red.styleId] ?? 1.0;
-    final redVsBlueMod = FightConfig.styleMatchupModifiers[red.styleId]?[blue.styleId] ?? 1.0;
+    // Definiciones de estrategia
+    final blueDef = FightStrategyConfig.strategies[blueStrategy.name];
+    final redDef  = FightStrategyConfig.strategies[redStrategy.name];
+
+    // Modificador de matchup entre estrategias
+    final stratVsStrat = FightStrategyConfig
+        .strategyMatchupModifiers[blueStrategy.name]?[redStrategy.name] ?? 1.0;
+    final stratVsStratRed = FightStrategyConfig
+        .strategyMatchupModifiers[redStrategy.name]?[blueStrategy.name] ?? 1.0;
+
+    // Modificador de matchup entre estilos marciales (ya existente)
+    final blueVsRedStyle = FightConfig.styleMatchupModifiers[blue.styleId]?[red.styleId] ?? 1.0;
+    final redVsBlueStyle = FightConfig.styleMatchupModifiers[red.styleId]?[blue.styleId] ?? 1.0;
 
     for (int round = 1; round <= FightConfig.roundsPerFight; round++) {
       int blueRndPts = 0, redRndPts = 0;
@@ -31,31 +41,127 @@ class FightSimulationService {
       final rs = redSlidersByRound?[round] ?? SliderValues.balanced;
 
       for (int tick = 1; tick <= FightConfig.ticksPerRound; tick++) {
-        final blueAtk = _atk(blue, blueStrategy, blueStamina, bs);
-        final blueDef = _def(blue, blueStamina, bs);
-        final redAtk  = _atk(red,  redStrategy,  redStamina,  rs);
-        final redDef  = _def(red,  redStamina,  rs);
 
-        final bScore = (blueAtk / redDef) * blueVsRedMod * _rngRange(rng);
-        final rScore = (redAtk  / blueDef) * redVsBlueMod  * _rngRange(rng);
+        // Stats efectivos con multiplicadores de estrategia
+        final blueEffective = blueDef?.attackMultipliers.apply(blue.stats.toMap())
+            ?? _defaultEffective(blue.stats.toMap());
+        final redEffective  = redDef?.attackMultipliers.apply(red.stats.toMap())
+            ?? _defaultEffective(red.stats.toMap());
 
-        void score(double s, String actorId, String opponentId) {
-          if (s >= FightConfig.dominantHitThreshold) {
-            if (actorId == blue.id) { blueRndPts += 2; blueTotalPts += 2; }
-            else { redRndPts += 2; redTotalPts += 2; }
-            events.add(FightEvent(tick: tick, round: round, type: 'dominant_hit', actorId: actorId, pointsScored: 2));
-          } else if (s >= FightConfig.cleanHitThreshold) {
-            if (actorId == blue.id) { blueRndPts += 1; blueTotalPts += 1; }
-            else { redRndPts += 1; redTotalPts += 1; }
-            events.add(FightEvent(tick: tick, round: round, type: 'clean_hit', actorId: actorId, pointsScored: 1));
+        // Ataque efectivo
+        final blueAtk = _computeAttack(blueEffective, blueStamina, bs);
+        final redAtk  = _computeAttack(redEffective,  redStamina,  rs);
+
+        // Defensa efectiva
+        final blueDef_ = _computeDefense(blueEffective, blueStamina, bs);
+        final redDef_  = _computeDefense(redEffective,  redStamina,  rs);
+
+        // Probabilidad de scoring
+        double blueScore = (blueAtk / redDef_)
+            * blueVsRedStyle
+            * stratVsStrat
+            * _rngRange(rng);
+
+        double redScore = (redAtk / blueDef_)
+            * redVsBlueStyle
+            * stratVsStratRed
+            * _rngRange(rng);
+
+        // ── Vulnerabilidad del blue ante el rojo ──────────────────────────
+        if (blueDef != null) {
+          final vuln = blueDef.vulnerableTo;
+          if (vuln != null) {
+            final redStatValue = red.stats.toMap()[vuln.triggerStat] ?? 0;
+            if (redStatValue >= vuln.triggerThreshold) {
+              // El rival tiene el stat alto → bonus de contraataque para el rojo
+              redScore *= (1 + vuln.counterBonus);
+            }
           }
         }
 
-        score(bScore, blue.id, red.id);
-        score(rScore, red.id, blue.id);
+        // ── Vulnerabilidad del red ante el azul ───────────────────────────
+        if (redDef != null) {
+          final vuln = redDef.vulnerableTo;
+          if (vuln != null) {
+            final blueStatValue = blue.stats.toMap()[vuln.triggerStat] ?? 0;
+            if (blueStatValue >= vuln.triggerThreshold) {
+              blueScore *= (1 + vuln.counterBonus);
+            }
+          }
+        }
 
-        blueStamina = (blueStamina - _stamCost(blueStrategy)).clamp(0, 100);
-        redStamina  = (redStamina  - _stamCost(redStrategy)).clamp(0, 100);
+        // ── Bonus del blue contra el rojo ─────────────────────────────────
+        if (blueDef != null) {
+          final bonus = blueDef.bonusAgainst;
+          if (bonus != null) {
+            final redStatValue = red.stats.toMap()[bonus.triggerStat] ?? 0;
+            if (redStatValue < bonus.triggerBelow) {
+              blueScore *= (1 + bonus.damageBonus);
+            }
+          }
+        }
+
+        // ── Bonus del red contra el azul ──────────────────────────────────
+        if (redDef != null) {
+          final bonus = redDef.bonusAgainst;
+          if (bonus != null) {
+            final blueStatValue = blue.stats.toMap()[bonus.triggerStat] ?? 0;
+            if (blueStatValue < bonus.triggerBelow) {
+              redScore *= (1 + bonus.damageBonus);
+            }
+          }
+        }
+
+        // ── Scoring blue ──────────────────────────────────────────────────
+        // Grappling: intento de derribo con umbral propio
+        final blueTakedownThreshold = blueDef?.hasTakedownMechanic == true
+            ? blueDef!.takedownThreshold
+            : FightConfig.takedownThreshold;
+
+        if (blueScore >= FightConfig.dominantHitThreshold) {
+          blueRndPts += 2; blueTotalPts += 2;
+          events.add(FightEvent(tick: tick, round: round,
+              type: 'dominant_hit', actorId: blue.id, pointsScored: 2));
+        } else if (blueScore >= blueTakedownThreshold &&
+            blueDef?.hasTakedownMechanic == true) {
+          blueRndPts += 2; blueTotalPts += 2;
+          redStamina = (redStamina - (blueDef?.takedownStaminaPenalty ?? 15))
+              .clamp(0, 100);
+          events.add(FightEvent(tick: tick, round: round,
+              type: 'takedown', actorId: blue.id, pointsScored: 2));
+        } else if (blueScore >= FightConfig.cleanHitThreshold) {
+          blueRndPts += 1; blueTotalPts += 1;
+          events.add(FightEvent(tick: tick, round: round,
+              type: 'clean_hit', actorId: blue.id, pointsScored: 1));
+        }
+
+        // ── Scoring red ───────────────────────────────────────────────────
+        final redTakedownThreshold = redDef?.hasTakedownMechanic == true
+            ? redDef!.takedownThreshold
+            : FightConfig.takedownThreshold;
+
+        if (redScore >= FightConfig.dominantHitThreshold) {
+          redRndPts += 2; redTotalPts += 2;
+          events.add(FightEvent(tick: tick, round: round,
+              type: 'dominant_hit', actorId: red.id, pointsScored: 2));
+        } else if (redScore >= redTakedownThreshold &&
+            redDef?.hasTakedownMechanic == true) {
+          redRndPts += 2; redTotalPts += 2;
+          blueStamina = (blueStamina - (redDef?.takedownStaminaPenalty ?? 15))
+              .clamp(0, 100);
+          events.add(FightEvent(tick: tick, round: round,
+              type: 'takedown', actorId: red.id, pointsScored: 2));
+        } else if (redScore >= FightConfig.cleanHitThreshold) {
+          redRndPts += 1; redTotalPts += 1;
+          events.add(FightEvent(tick: tick, round: round,
+              type: 'clean_hit', actorId: red.id, pointsScored: 1));
+        }
+
+        // ── Stamina drain según estrategia ────────────────────────────────
+        blueStamina = (blueStamina -
+            (blueDef?.staminaCostPerTick ?? 4.0)).clamp(0, 100);
+        redStamina  = (redStamina -
+            (redDef?.staminaCostPerTick  ?? 4.0)).clamp(0, 100);
       }
 
       rounds.add(FightRoundResult(
@@ -65,7 +171,8 @@ class FightSimulationService {
     }
 
     final winnerId = blueTotalPts >= redTotalPts ? blue.id : red.id;
-    final highlights = events.where((e) => e.type == 'dominant_hit').toList()
+    final highlights = events.where((e) =>
+    e.type == 'dominant_hit' || e.type == 'takedown').toList()
       ..sort((a, b) => b.pointsScored.compareTo(a.pointsScored));
 
     return FightResult(
@@ -78,25 +185,27 @@ class FightSimulationService {
     );
   }
 
-  double _atk(Student s, FightStrategy st, double stamina, SliderValues sl) {
-    final w = FightConfig.strategyWeights[st.name] ?? [0.33, 0.33, 0.34];
-    final raw = s.stats.str * w[0] + s.stats.spd * w[1] + s.stats.tec * w[2];
+  double _computeAttack(Map<String, double> eff, double stamina, SliderValues sl) {
+    final raw = eff['str']! * 0.35 + eff['spd']! * 0.35 + eff['tec']! * 0.30;
     return raw * _fatigue(stamina) * sl.attack;
   }
 
-  double _def(Student s, double stamina, SliderValues sl) {
-    final raw = s.stats.def * 0.6 + s.stats.men * 0.4;
+  double _computeDefense(Map<String, double> eff, double stamina, SliderValues sl) {
+    final raw = eff['def']! * 0.6 + eff['men']! * 0.4;
     return raw * _fatigue(stamina) * (sl.defense + sl.mind * 0.5);
   }
+
+  Map<String, double> _defaultEffective(Map<String, int> stats) =>
+      stats.map((k, v) => MapEntry(k, v.toDouble()));
 
   double _fatigue(double stamina) {
     final spent = (100 - stamina) / 100;
     if (spent >= 1.0) return FightConfig.minEfficiencyAtZeroStamina;
-    if (spent >= FightConfig.fatigueHighThreshold) return 1 - FightConfig.fatigueHighPenalty;
+    if (spent >= FightConfig.fatigueHighThreshold)   return 1 - FightConfig.fatigueHighPenalty;
     if (spent >= FightConfig.fatigueMediumThreshold) return 1 - FightConfig.fatigueMediumPenalty;
     return 1.0;
   }
 
-  double _stamCost(FightStrategy s) => FightConfig.staminaCostPerTick[s.name] ?? 4.0;
-  double _rngRange(Random r) => FightConfig.rngMin + r.nextDouble() * (FightConfig.rngMax - FightConfig.rngMin);
+  double _rngRange(Random r) =>
+      FightConfig.rngMin + r.nextDouble() * (FightConfig.rngMax - FightConfig.rngMin);
 }

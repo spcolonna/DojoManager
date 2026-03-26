@@ -7,11 +7,11 @@ class AppColors {
   AppColors._();
 
   // ─── FONDOS ───────────────────────────────────────────────────────────────
-  static const Color bgDeep     = Color(0xFF0A0A0A);
-  static const Color bgSurface  = Color(0xFF141414);
-  static const Color bgElevated = Color(0xFF1C1C1C);
-  static const Color bgInput    = Color(0xFF2A2A2A);
-  static const Color bgDivider  = Color(0xFF333333);
+  static const Color bgDeep     = Color(0xFF1A1A1A); 
+  static const Color bgSurface  = Color(0xFF242424); 
+  static const Color bgElevated = Color(0xFF2C2C2C); 
+  static const Color bgInput    = Color(0xFF383838);
+  static const Color bgDivider  = Color(0xFF444444);
 
   // ─── PRIMARIO — ROJO COMBATE ──────────────────────────────────────────────
   static const Color primary      = Color(0xFFFF3B3B);

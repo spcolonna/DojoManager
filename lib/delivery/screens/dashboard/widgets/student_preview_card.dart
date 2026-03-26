@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/belt_helper.dart';
@@ -47,8 +48,7 @@ class StudentPreviewCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: styleColor.withOpacity(0.3)),
             ),
-            child: Icon(Icons.person_rounded,
-                color: styleColor, size: 26),
+            child: Icon(PhosphorIconsRegular.user, color: styleColor, size: 26),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -109,8 +109,7 @@ class StudentPreviewCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const Icon(Icons.chevron_right_rounded,
-              color: AppColors.disabled, size: 20),
+          const Icon(PhosphorIconsRegular.caretRight, color: AppColors.disabled, size: 20),
         ],
       ),
     );

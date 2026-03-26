@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grand_dojo/core/constants/app_colors.dart';
 import 'package:grand_dojo/core/utils/l10n_helper.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../../core/constants/app_icons.dart';
 import '../settings/settings_screen.dart';
 import '../training/training_screen.dart';
 import '../tournament/tournament_screen.dart';
@@ -41,11 +43,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ];
 
     final navItems = [
-      NavItem(label: loc.navDojo,       icon: Icons.home_work_rounded),
-      NavItem(label: loc.navTraining,   icon: Icons.fitness_center_rounded),
-      NavItem(label: loc.navTournament, icon: Icons.emoji_events_rounded),
-      NavItem(label: loc.navStudents,   icon: Icons.people_rounded),
-      NavItem(label: loc.navShop,       icon: Icons.diamond_rounded),
+      NavItem(label: loc.navDojo,       icon: PhosphorIconsFill.house),
+      NavItem(label: loc.navTraining,   icon: PhosphorIconsFill.barbell),
+      NavItem(label: loc.navTournament, icon: PhosphorIconsFill.trophy),
+      NavItem(label: loc.navStudents,   icon: PhosphorIconsFill.users),
+      NavItem(label: loc.navShop,       icon: PhosphorIconsFill.storefront),
     ];
 
     return Scaffold(
@@ -91,7 +93,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                     const Spacer(),
                     CurrencyChip(
-                      icon: Icons.monetization_on_rounded,
+                      icon: AppIcons.currencyMD,
                       value: _md,
                       color: AppColors.goldLight,
                       bgColor: AppColors.goldMuted,
@@ -99,7 +101,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                     const SizedBox(width: 8),
                     CurrencyChip(
-                      icon: Icons.diamond_rounded,
+                      icon: AppIcons.currencyGM,
                       value: _gm,
                       color: AppColors.infoLight,
                       bgColor: AppColors.infoBg,
@@ -114,7 +116,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             MaterialPageRoute(
                                 builder: (_) => const MessagesScreen()),
                           ),
-                          icon: const Icon(Icons.notifications_rounded,
+                          icon: const Icon(AppIcons.navMessages,
                               color: AppColors.textSecondary, size: 24),
                           padding: const EdgeInsets.all(8),
                           constraints: const BoxConstraints(),
@@ -139,7 +141,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         MaterialPageRoute(
                             builder: (_) => const SettingsScreen()),
                       ),
-                      icon: const Icon(Icons.settings_rounded,
+                      icon: const Icon(AppIcons.navSettings,
                           color: AppColors.textSecondary, size: 24),
                       padding: const EdgeInsets.all(8),
                       constraints: const BoxConstraints(),

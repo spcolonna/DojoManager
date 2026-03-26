@@ -1,8 +1,12 @@
+import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/providers/locale_provider.dart';
+import '../../../core/utils/l10n_helper.dart';
 import '../auth/login_screen.dart';
 import '../../../infrastructure/repositories/firebase_auth_repository.dart';
 
@@ -11,7 +15,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n           = AppLocalizations.of(context)!;
+    final loc = l10n(context);
     final currentLocale  = ref.watch(localeProvider);
 
     return Scaffold(
@@ -19,7 +23,7 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF141824),
         title: Text(
-          l10n.settingsTitle,
+          loc.settingsTitle,
           style: GoogleFonts.cinzelDecorative(
             fontSize: 16,
             color: const Color(0xFFC9A84C),
@@ -38,9 +42,9 @@ class SettingsScreen extends ConsumerWidget {
         children: [
 
           // ── LANGUAGE ──────────────────────────────────────────────────
-          _SectionHeader(label: l10n.settingsLanguage),
+          _SectionHeader(label: loc.settingsLanguage),
           _LanguageTile(
-            language: l10n.settingsLanguageEnglish,
+            language: loc.settingsLanguageEnglish,
             locale: const Locale('en'),
             currentLocale: currentLocale,
             flag: '🇺🇸',
@@ -49,7 +53,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           _LanguageTile(
-            language: l10n.settingsLanguageSpanish,
+            language: loc.settingsLanguageSpanish,
             locale: const Locale('es'),
             currentLocale: currentLocale,
             flag: '🇪🇸',
@@ -62,26 +66,26 @@ class SettingsScreen extends ConsumerWidget {
           // ── SOUND ────────────────────────────────────────────────────
           _SectionHeader(label: 'Audio'),
           _SwitchTile(
-            label: l10n.settingsSound,
-            icon: Icons.music_note_outlined,
+            label: loc.settingsSound,
+            icon: PhosphorIconsRegular.speakerHigh,
             value: true,
             onChanged: (_) {},
           ),
           _SwitchTile(
-            label: l10n.settingsMusic,
-            icon: Icons.queue_music_outlined,
+            label: loc.settingsMusic,
+            icon: PhosphorIconsRegular.musicNote,
             value: true,
             onChanged: (_) {},
           ),
           const _Divider(),
 
           // ── ACCOUNT ──────────────────────────────────────────────────
-          _SectionHeader(label: l10n.settingsAccount),
+          _SectionHeader(label: loc.settingsAccount),
           _ActionTile(
-            label: l10n.settingsSignOut,
-            icon: Icons.logout,
-            color: const Color(0xFFC0392B),
-            onTap: () => _confirmSignOut(context, ref, l10n),
+            label: loc.settingsSignOut,
+            icon: PhosphorIconsRegular.signOut,
+            color: AppColors.redAction,
+            onTap: () => _confirmSignOut(context, ref, loc as AppLocalizations),
           ),
           const _Divider(),
 
@@ -90,7 +94,7 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: Text(
-                '${l10n.settingsVersion} 1.0.0',
+                '${loc.settingsVersion} 1.0.0',
                 style: GoogleFonts.rajdhani(
                   fontSize: 12,
                   color: const Color(0xFF4A5068),
@@ -106,21 +110,21 @@ class SettingsScreen extends ConsumerWidget {
   void _confirmSignOut(
       BuildContext context,
       WidgetRef ref,
-      AppLocalizations l10n,
+      AppLocalizations loc,
       ) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1C2235),
         title: Text(
-          l10n.settingsSignOut,
+          loc.settingsSignOut,
           style: GoogleFonts.cinzelDecorative(
             color: const Color(0xFFF0F0F0),
             fontSize: 14,
           ),
         ),
         content: Text(
-          l10n.settingsSignOutConfirm,
+          loc.settingsSignOutConfirm,
           style: GoogleFonts.rajdhani(
             color: const Color(0xFF9099B0),
             fontSize: 14,
@@ -130,7 +134,7 @@ class SettingsScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
-              l10n.settingsSignOutCancel,
+              loc.settingsSignOutCancel,
               style: GoogleFonts.rajdhani(
                 color: const Color(0xFF9099B0),
                 fontWeight: FontWeight.w600,
@@ -148,7 +152,7 @@ class SettingsScreen extends ConsumerWidget {
               );
             },
             child: Text(
-              l10n.settingsSignOutConfirmBtn,
+              loc.settingsSignOutConfirmBtn,
               style: GoogleFonts.rajdhani(
                 color: const Color(0xFFC0392B),
                 fontWeight: FontWeight.w700,
@@ -206,7 +210,11 @@ class _LanguageTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       tileColor: Colors.transparent,
-      leading: Text(flag, style: const TextStyle(fontSize: 22)),
+      leading: CountryFlag.fromCountryCode(
+        locale.languageCode == 'en' ? 'US' : 'ES',
+        width: 32,
+        height: 24
+      ),
       title: Text(
         language,
         style: GoogleFonts.rajdhani(

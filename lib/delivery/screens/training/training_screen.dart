@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/animations/app_animations.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/l10n_helper.dart';
@@ -604,12 +605,12 @@ class _CategorySectionState extends State<_CategorySection> {
   };
 
   IconData _categoryIcon(ActivityCategory cat) => switch (cat) {
-    ActivityCategory.strength   => Icons.fitness_center_rounded,
-    ActivityCategory.cardio     => Icons.directions_run_rounded,
-    ActivityCategory.technique  => Icons.precision_manufacturing_rounded,
-    ActivityCategory.mindDefense=> Icons.psychology_rounded,
-    ActivityCategory.combat     => Icons.sports_mma_rounded,
-    ActivityCategory.recovery   => Icons.spa_rounded,
+    ActivityCategory.strength    => PhosphorIconsRegular.barbell,
+    ActivityCategory.cardio      => PhosphorIconsRegular.sneaker,
+    ActivityCategory.technique   => PhosphorIconsRegular.target,
+    ActivityCategory.mindDefense => PhosphorIconsRegular.brain,
+    ActivityCategory.combat      => PhosphorIconsRegular.sword,
+    ActivityCategory.recovery    => PhosphorIconsRegular.heartbeat,
   };
 
   String _categoryName(ActivityCategory cat, dynamic loc) => switch (cat) {

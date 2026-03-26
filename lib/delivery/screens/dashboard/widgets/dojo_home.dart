@@ -5,8 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:grand_dojo/delivery/screens/dashboard/widgets/quick_card.dart';
 import 'package:grand_dojo/delivery/screens/dashboard/widgets/student_card_skeleton.dart';
 import 'package:grand_dojo/delivery/screens/dashboard/widgets/student_preview_card.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_icons.dart';
 import '../../../../core/providers/dojo_provider.dart';
 import '../../../../core/utils/l10n_helper.dart';
 import '../../dojo/dojo_screen.dart';
@@ -139,7 +141,7 @@ class DojoHome extends ConsumerWidget {
               Expanded(
                 child: QuickCard(
                   title: loc.navMarket,
-                  icon: Icons.storefront_rounded,
+                  icon: PhosphorIconsRegular.storefront,
                   gradient: AppColors.gradientMarket,
                   iconColor: AppColors.purpleLight,
                   borderColor: AppColors.purple,
@@ -152,7 +154,7 @@ class DojoHome extends ConsumerWidget {
               Expanded(
                 child: QuickCard(
                   title: loc.navDojo,
-                  icon: Icons.construction_rounded,
+                  icon: PhosphorIconsRegular.wrench,
                   gradient: AppColors.gradientUpgrades,
                   iconColor: AppColors.successLight,
                   borderColor: AppColors.successBorder,
@@ -257,7 +259,7 @@ class DojoHome extends ConsumerWidget {
                     color: AppColors.redAction.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.emoji_events_rounded,
+                  child: const Icon(AppIcons.fightWin,
                       color: AppColors.redLight, size: 26),
                 ),
                 const SizedBox(width: 14),

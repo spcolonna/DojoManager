@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/config/skill_tree_config.dart';
 import '../../../core/animations/app_animations.dart';
@@ -235,12 +237,12 @@ class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
   }
 
   IconData _branchIcon(String id) => switch (id) {
-    'power'     => Icons.fitness_center_rounded,
-    'agility'   => Icons.directions_run_rounded,
-    'technique' => Icons.precision_manufacturing_rounded,
-    'guard'     => Icons.shield_rounded,
-    'mind'      => Icons.psychology_rounded,
-    _           => Icons.star_rounded,
+    'power'     => PhosphorIconsRegular.lightning,
+    'agility'   => PhosphorIconsRegular.wind,
+    'technique' => PhosphorIconsRegular.target,
+    'guard'     => PhosphorIconsRegular.shield,
+    'mind'      => PhosphorIconsRegular.brain,
+    _           => PhosphorIconsRegular.star,
   };
 
   String _branchShortName(String id, dynamic loc) => switch (id) {
@@ -453,7 +455,7 @@ class _SkillNodeCard extends StatelessWidget {
               ),
               child: Icon(
                 isUnlocked
-                    ? Icons.check_rounded
+                    ? AppIcons.nodeUnlocked
                     : (canUnlock ? Icons.lock_open_rounded : Icons.lock_rounded),
                 color: isUnlocked ? color : textColor,
                 size: 20,

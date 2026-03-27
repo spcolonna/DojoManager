@@ -125,9 +125,7 @@ class TournamentNotifier extends StateNotifier<Tournament?> {
       _aiOpponents.where((o) => o.id == teamId).firstOrNull;
 }
 
-final tournamentProvider =
-StateNotifierProvider<TournamentNotifier, Tournament?>((ref) {
+final tournamentProvider = StateNotifierProvider<TournamentNotifier, Tournament?>((ref) {
   final notifier = TournamentNotifier(ref);
-  notifier.initLeague();
   return notifier;
 });

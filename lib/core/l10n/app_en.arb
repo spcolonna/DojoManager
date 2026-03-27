@@ -433,5 +433,24 @@
       "tournamentSimulateMatch": "SIMULATE MATCH",
       "tournamentMatchResult": "Match Result",
       "tournamentFightsWon": "{w} - {l}",
-      "@tournamentFightsWon": { "placeholders": { "w": { "type": "int" }, "l": { "type": "int" } } }
+      "@tournamentFightsWon": { "placeholders": { "w": { "type": "int" }, "l": { "type": "int" } } },
+      
+      "tournamentNoActive": "No active tournament",
+        "tournamentInviteMessage": "Style League invitations arrive at the start of each season. Check your messages.",
+        "tournamentSeasonWeek": "Season {season} · Week {week}",
+        "@tournamentSeasonWeek": {
+          "placeholders": {
+            "season": { "type": "int" },
+            "week": { "type": "int" }
+          }
+        },
+        "tournamentInvitePending": "You have a pending invitation!",
+        "tournamentInviteAccept": "JOIN THE LEAGUE",
+        "tournamentInviteLeagueBody": "Your school has been invited to compete in the {style} Style League. Season {season} begins now.",
+        "@tournamentInviteLeagueBody": {
+          "placeholders": {
+            "style": { "type": "String" },
+            "season": { "type": "int" }
+          }
+        }
 }

@@ -7,6 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../../core/utils/l10n_helper.dart';
+import '../../../domain/use_cases/auth/reset_user_data_use_case.dart';
 import '../auth/login_screen.dart';
 import '../../../infrastructure/repositories/firebase_auth_repository.dart';
 
@@ -79,6 +80,68 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const _Divider(),
 
+
+
+          // ── Reset de datos (solo desarrollo) ─────────────────────────
+          const Divider(height: 32, color: AppColors.bgDivider),
+
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.redAction.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.redAction.withOpacity(0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.warning_rounded,
+                        color: AppColors.warning, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      'ZONA DE DESARROLLO',
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.warning,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _confirmReset(context, ref, loc),
+                    icon: const Icon(Icons.delete_forever_rounded,
+                        color: AppColors.redLight, size: 18),
+                    label: Text(
+                      'Borrar todos los datos y reiniciar',
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.redLight,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                          color: AppColors.redAction.withOpacity(0.5)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          
+          
+          
           // ── ACCOUNT ──────────────────────────────────────────────────
           _SectionHeader(label: loc.settingsAccount),
           _ActionTile(
@@ -107,6 +170,99 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+
+  void _confirmReset(BuildContext context, WidgetRef ref, dynamic loc) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.bgElevated,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_rounded,
+                color: AppColors.warning, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              '¿Borrar todo?',
+              style: GoogleFonts.cinzelDecorative(
+                fontSize: 14,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Se van a borrar el dojo, todos los estudiantes y el progreso de la cuenta. Esta acción no se puede deshacer.',
+          style: GoogleFonts.rajdhani(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancelar',
+              style: GoogleFonts.rajdhani(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _doReset(context, ref);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.redAction,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(
+              'BORRAR TODO',
+              style: GoogleFonts.rajdhani(
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _doReset(BuildContext context, WidgetRef ref) async {
+    // Loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: AppColors.redAction),
+      ),
+    );
+
+    try {
+      await ResetUserDataUseCase().execute();
+      // El sign out dispara el AppStateProvider automáticamente
+      // → redirige al login sin necesidad de Navigator
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // cierra el loading
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $e',
+              style: GoogleFonts.rajdhani(color: Colors.white)),
+          backgroundColor: AppColors.redDark,
+        ));
+      }
+    }
+  }
+  
+  
+  
   void _confirmSignOut(
       BuildContext context,
       WidgetRef ref,

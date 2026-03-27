@@ -28,12 +28,10 @@ class AppStateNotifier extends StateNotifier<AppState> {
 
   Future<void> _init() async {
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) {
       state = const AppState(route: AppRoute.login);
       return;
     }
-
     await checkUserState(user.uid);
   }
 
@@ -51,7 +49,6 @@ class AppStateNotifier extends StateNotifier<AppState> {
     final dojo = dojoResult.fold((_) => null, (d) => d);
 
     if (dojo == null) {
-      // Tiene onboarding marcado pero no tiene dojo — caso raro, manda a onboarding
       state = AppState(route: AppRoute.onboarding, userProgress: progress);
       return;
     }
@@ -69,7 +66,6 @@ class AppStateNotifier extends StateNotifier<AppState> {
     required String styleId,
     required int startingMD,
   }) async {
-    // 1. Crear dojo
     final dojoResult = await _repo.createDojo(
       ownerId: userId,
       name: schoolName,
@@ -81,13 +77,11 @@ class AppStateNotifier extends StateNotifier<AppState> {
 
     final dojo = dojoResult.fold((_) => null, (d) => d)!;
 
-    // 2. Crear estudiantes iniciales
     await _repo.createStartingStudents(
       dojoId: dojo.id,
       styleId: styleId,
     );
 
-    // 3. Marcar onboarding completo
     await _repo.markOnboardingCompleted(userId);
 
     state = AppState(

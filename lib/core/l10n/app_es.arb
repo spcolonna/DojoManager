@@ -432,5 +432,24 @@
         "tournamentSimulateMatch": "SIMULAR COMBATE",
         "tournamentMatchResult": "Resultado del Partido",
         "tournamentFightsWon": "{w} - {l}",
-        "@tournamentFightsWon": { "placeholders": { "w": { "type": "int" }, "l": { "type": "int" } } }
+        "@tournamentFightsWon": { "placeholders": { "w": { "type": "int" }, "l": { "type": "int" } } },
+        
+        "tournamentNoActive": "Sin torneo activo",
+          "tournamentInviteMessage": "Las invitaciones a la Liga de Estilo llegan al inicio de cada temporada. Revisá tus mensajes.",
+          "tournamentSeasonWeek": "Temporada {season} · Semana {week}",
+          "@tournamentSeasonWeek": {
+            "placeholders": {
+              "season": { "type": "int" },
+              "week": { "type": "int" }
+            }
+          },
+          "tournamentInvitePending": "¡Tenés una invitación pendiente!",
+          "tournamentInviteAccept": "UNIRSE A LA LIGA",
+          "tournamentInviteLeagueBody": "Tu escuela fue invitada a competir en la Liga de Estilo {style}. La temporada {season} comienza ahora.",
+          "@tournamentInviteLeagueBody": {
+            "placeholders": {
+              "style": { "type": "String" },
+              "season": { "type": "int" }
+            }
+          }
 }

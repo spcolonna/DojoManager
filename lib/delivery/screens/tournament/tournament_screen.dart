@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/providers/tournament_provider.dart';
-import '../../../core/providers/dojo_provider.dart';
+import '../../widgets/no_tournament_view.dart';
 import 'next_match_tab.dart';
 import 'standings_tab.dart';
 import 'results_tab.dart';
@@ -24,10 +24,6 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
   void initState() {
     super.initState();
     _tabs = TabController(length: 3, vsync: this);
-    // Inicializar liga al entrar
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(tournamentProvider.notifier).initLeague();
-    });
   }
 
   @override
@@ -108,9 +104,7 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
         ),
       ),
       body: tournament == null
-          ? const Center(
-        child: CircularProgressIndicator(color: AppColors.redAction),
-      )
+          ? const NoTournamentView()
           : TabBarView(
         controller: _tabs,
         children: [

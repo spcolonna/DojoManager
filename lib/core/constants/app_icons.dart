@@ -30,6 +30,9 @@ class AppIcons {
   static const IconData actionCollapse = PhosphorIconsRegular.caretUp;
   static const IconData actionSearch   = PhosphorIconsRegular.magnifyingGlass;
   static const IconData actionSignOut  = PhosphorIconsRegular.signOut;
+  static const IconData actionClose    = PhosphorIconsRegular.x;
+  static const IconData actionHistory  = PhosphorIconsRegular.clockCounterClockwise;
+  static const IconData actionTree     = PhosphorIconsRegular.treeStructure;
 
   // ─── ESTUDIANTES ──────────────────────────────────────────────────────────
   static const IconData student        = PhosphorIconsRegular.user;
@@ -38,6 +41,7 @@ class AppIcons {
   static const IconData studentBelt    = PhosphorIconsRegular.medal;
   static const IconData studentXP      = PhosphorIconsFill.star;
   static const IconData studentInjured = PhosphorIconsRegular.bandaids;
+  static const IconData studentMedal = PhosphorIconsRegular.medal;
 
   // ─── DOJO ─────────────────────────────────────────────────────────────────
   static const IconData dojo           = PhosphorIconsFill.house;
@@ -94,4 +98,6 @@ class AppIcons {
   static const IconData statusError   = PhosphorIconsFill.xCircle;
   static const IconData statusInfo    = PhosphorIconsFill.info;
   static const IconData statusFatigue = PhosphorIconsRegular.flame;
+  static const IconData statusFire     = PhosphorIconsRegular.flame;
+  static const IconData statusHeal     = PhosphorIconsRegular.bandaids;
 }

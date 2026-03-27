@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:grand_dojo/domain/entities/training_session.dart';
 import '../value_objects/belt.dart';
 import '../value_objects/student_stats.dart';
 
@@ -19,6 +20,7 @@ class Student extends Equatable {
   final int fatiguePercent;    // 0–100, acumulado en la semana
   final bool isInjured;
   final int injuryWeeksRemaining;
+  final List<TrainingSession> trainingHistory;
 
   const Student({
     required this.id,
@@ -35,6 +37,7 @@ class Student extends Equatable {
     required this.fatiguePercent,
     required this.isInjured,
     required this.injuryWeeksRemaining,
+    this.trainingHistory = const [],
   });
 
   bool get canFight => !isInjured && fatiguePercent < 100;
@@ -44,6 +47,7 @@ class Student extends Equatable {
     String? styleId, Belt? belt, int? currentXP, StudentStats? stats,
     StudentTier? tier, int? skillPoints, List<String>? unlockedNodeIds,
     int? fatiguePercent, bool? isInjured, int? injuryWeeksRemaining,
+    List<TrainingSession>? trainingHistory,
   }) => Student(
     id: id ?? this.id,
     dojoId: dojoId ?? this.dojoId,
@@ -59,6 +63,7 @@ class Student extends Equatable {
     fatiguePercent: fatiguePercent ?? this.fatiguePercent,
     isInjured: isInjured ?? this.isInjured,
     injuryWeeksRemaining: injuryWeeksRemaining ?? this.injuryWeeksRemaining,
+    trainingHistory: trainingHistory ?? this.trainingHistory,
   );
 
   Map<String, dynamic> toMap() => {
@@ -73,6 +78,7 @@ class Student extends Equatable {
     'fatiguePercent': fatiguePercent,
     'isInjured': isInjured,
     'injuryWeeksRemaining': injuryWeeksRemaining,
+    'trainingHistory': trainingHistory.map((s) => s.toMap()).toList(),
   };
 
   factory Student.fromMap(Map<String, dynamic> map) => Student(
@@ -90,6 +96,9 @@ class Student extends Equatable {
     fatiguePercent: map['fatiguePercent'] ?? 0,
     isInjured: map['isInjured'] ?? false,
     injuryWeeksRemaining: map['injuryWeeksRemaining'] ?? 0,
+    trainingHistory: (map['trainingHistory'] as List? ?? [])
+        .map((s) => TrainingSession.fromMap(s))
+        .toList(),
   );
 
   @override

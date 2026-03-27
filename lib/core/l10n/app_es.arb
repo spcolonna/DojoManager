@@ -358,5 +358,40 @@
           "dayThu": "JUE",
           "dayFri": "VIE",
           "daySat": "SÁB",
-          "daySun": "DOM"
+          "daySun": "DOM",
+          
+          "studentsTitle": "Estudiantes",
+            "studentDetailTitle": "Perfil del Estudiante",
+            "studentStats": "Stats",
+            "studentProgress": "Progreso",
+            "studentHistory": "Historial",
+            "studentNoHistory": "Sin sesiones de entrenamiento todavía",
+            "studentXPToNext": "{xp} XP para la próxima faja",
+            "@studentXPToNext": { "placeholders": { "xp": { "type": "int" } } },
+            "studentAvailablePH": "{ph} PH disponibles",
+            "@studentAvailablePH": { "placeholders": { "ph": { "type": "int" } } },
+            "studentOpenTree": "Árbol de Habilidades",
+            "studentFatigueLevel": "Fatiga",
+            "studentInjured": "Lesionado",
+            "studentInjuredWeeks": "Baja por {weeks} semana(s)",
+            "@studentInjuredWeeks": { "placeholders": { "weeks": { "type": "int" } } },
+            "studentDanLevel": "Dan {level}",
+            "@studentDanLevel": { "placeholders": { "level": { "type": "int" } } },
+            "studentTierBronze": "Bronce",
+            "studentTierSilver": "Plata",
+            "studentTierGold": "Oro",
+            "studentTierPlatinum": "Platino",
+            "historyDayLabel": "{day} · {activities}",
+            "@historyDayLabel": {
+              "placeholders": {
+                "day": { "type": "String" },
+                "activities": { "type": "String" }
+              }
+            },
+            "historyXPGained": "+{xp} XP",
+            "@historyXPGained": { "placeholders": { "xp": { "type": "int" } } },
+            "historyPHGained": "+{ph} PH",
+            "@historyPHGained": { "placeholders": { "ph": { "type": "int" } } },
+            "historyLevelUp": "¡Subió de faja! {belt}",
+            "@historyLevelUp": { "placeholders": { "belt": { "type": "String" } } }
 }

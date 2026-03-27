@@ -142,7 +142,7 @@ class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.psychology_rounded,
+                    const Icon(AppIcons.trainingMind,
                         color: AppColors.goldPrimary, size: 14),
                     const SizedBox(width: 4),
                     Text(
@@ -292,7 +292,7 @@ class _BranchTree extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.account_tree_rounded, color: color, size: 18),
+              Icon(AppIcons.branchPower, color: color, size: 18),
               const SizedBox(width: 8),
               Text(
                 _branchName(branch.id, loc),

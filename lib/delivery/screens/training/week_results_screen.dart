@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/animations/app_animations.dart'; 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../domain/use_cases/training/simulate_week_use_case.dart';
 import '../../widgets/animations/staggered_list.dart';
@@ -71,7 +72,7 @@ class _WeekResultsScreenState extends ConsumerState<WeekResultsScreen>
                             color: AppColors.goldPrimary.withOpacity(0.5),
                             width: 2),
                       ),
-                      child: const Icon(Icons.check_rounded,
+                      child: const Icon(AppIcons.actionConfirm,
                           color: AppColors.goldPrimary, size: 36),
                     ),
                     const SizedBox(height: 16),
@@ -145,7 +146,7 @@ class _WeekResultsScreenState extends ConsumerState<WeekResultsScreen>
                             ),
                           ));
                         },
-                        icon: const Icon(Icons.account_tree_rounded, size: 18),
+                        icon: const Icon(AppIcons.branchPower, size: 18),
                         label: Text(
                           loc.trainingDistributePoints,
                           style: GoogleFonts.rajdhani(
@@ -266,7 +267,7 @@ class _ResultCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               _StatChip(
-                icon: Icons.psychology_rounded,
+                icon: AppIcons.trainingMind,
                 label: '+${result.phGained} PH',
                 color: AppColors.goldPrimary,
               ),
@@ -281,7 +282,7 @@ class _ResultCard extends StatelessWidget {
               if (result.injured) ...[
                 const SizedBox(width: 10),
                 _StatChip(
-                  icon: Icons.healing_rounded,
+                  icon: AppIcons.studentInjured,
                   label: 'Injured',
                   color: AppColors.redLight,
                 ),

@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../../entities/student.dart';
+import '../../entities/training_session.dart';
 import '../../entities/weekly_plan.dart';
 import '../../value_objects/belt.dart';
 import '../../../core/config/training_activities_config.dart';
@@ -107,12 +108,25 @@ class SimulateDayUseCase {
         belt = belt.next;
         leveledUp = true;
       }
+      
+      // Construir la sesión de historial
+      final session = TrainingSession(
+        dayKey: plan.day.labelKey,
+        activityIds: plan.activityIds,
+        xpGained: xp,
+        phGained: ph,
+        fatigueAfter: newFatigue,
+        leveledUp: leveledUp,
+        newBeltKey: leveledUp ? belt.titleKey : null,
+        date: DateTime.now(),
+      );
 
       final updated = student.copyWith(
         currentXP: newXP,
         belt: belt,
         skillPoints: student.skillPoints + ph,
-        fatiguePercent: newFatigue as int,
+        fatiguePercent: newFatigue,
+        trainingHistory: [session, ...student.trainingHistory].take(30).toList(),
       );
 
       await _repo.updateStudent(updated);

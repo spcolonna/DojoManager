@@ -358,5 +358,40 @@
       "dayThu": "THU",
       "dayFri": "FRI",
       "daySat": "SAT",
-      "daySun": "SUN"
+      "daySun": "SUN",
+      
+      "studentsTitle": "Students",
+        "studentDetailTitle": "Student Profile",
+        "studentStats": "Stats",
+        "studentProgress": "Progress",
+        "studentHistory": "Training History",
+        "studentNoHistory": "No training sessions yet",
+        "studentXPToNext": "{xp} XP to next belt",
+        "@studentXPToNext": { "placeholders": { "xp": { "type": "int" } } },
+        "studentAvailablePH": "{ph} PH available",
+        "@studentAvailablePH": { "placeholders": { "ph": { "type": "int" } } },
+        "studentOpenTree": "Skill Tree",
+        "studentFatigueLevel": "Fatigue",
+        "studentInjured": "Injured",
+        "studentInjuredWeeks": "Out for {weeks} week(s)",
+        "@studentInjuredWeeks": { "placeholders": { "weeks": { "type": "int" } } },
+        "studentDanLevel": "Dan {level}",
+        "@studentDanLevel": { "placeholders": { "level": { "type": "int" } } },
+        "studentTierBronze": "Bronze",
+        "studentTierSilver": "Silver",
+        "studentTierGold": "Gold",
+        "studentTierPlatinum": "Platinum",
+        "historyDayLabel": "{day} · {activities}",
+        "@historyDayLabel": {
+          "placeholders": {
+            "day": { "type": "String" },
+            "activities": { "type": "String" }
+          }
+        },
+        "historyXPGained": "+{xp} XP",
+        "@historyXPGained": { "placeholders": { "xp": { "type": "int" } } },
+        "historyPHGained": "+{ph} PH",
+        "@historyPHGained": { "placeholders": { "ph": { "type": "int" } } },
+        "historyLevelUp": "Belt up! {belt}",
+        "@historyLevelUp": { "placeholders": { "belt": { "type": "String" } } }
 }

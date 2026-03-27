@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/animations/app_animations.dart';
+import '../../core/constants/app_icons.dart';
 import '../../domain/entities/dojo.dart';
 
 class DojoInfoCard extends StatefulWidget {
@@ -148,14 +149,14 @@ class _DojoInfoCardState extends State<DojoInfoCard>
                 ),
                 const SizedBox(width: 8),
                 _StatPill(
-                  icon: Icons.military_tech_rounded,
+                  icon: AppIcons.studentMedal,
                   label: 'Div. 3',
                   sublabel: 'Division',
                   color: AppColors.info,
                 ),
                 const SizedBox(width: 8),
                 _StatPill(
-                  icon: Icons.emoji_events_rounded,
+                  icon: AppIcons.fightWin,
                   label: '0',
                   sublabel: 'Wins',
                   color: AppColors.success,

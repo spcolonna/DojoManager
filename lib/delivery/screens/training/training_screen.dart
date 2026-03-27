@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/animations/app_animations.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/config/training_activities_config.dart';
 import '../../../core/providers/dojo_provider.dart';
@@ -406,9 +407,9 @@ class _WeekCalendar extends StatelessWidget {
                     // ── Ícono del tipo de día ────────────────────────
                     Icon(
                       switch (dayPlan.type) {
-                        DayType.training   => Icons.fitness_center_rounded,
+                        DayType.training   => AppIcons.trainingStrength,
                         DayType.rest       => Icons.hotel_rounded,
-                        DayType.tournament => Icons.emoji_events_rounded,
+                        DayType.tournament => AppIcons.fightWin,
                       },
                       size: 14,
                       color: isSelected ? color : AppColors.textTertiary,
@@ -566,7 +567,7 @@ class _TrainingDayView extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_rounded,
+                      const Icon(AppIcons.actionConfirm,
                           color: AppColors.success, size: 12),
                       const SizedBox(width: 4),
                       Text(
@@ -713,13 +714,13 @@ class _TrainingDayView extends ConsumerWidget {
                     color: plan.totalFatigue > 60
                         ? AppColors.warning
                         : AppColors.textSecondary,
-                    icon: Icons.local_fire_department_rounded,
+                    icon: AppIcons.statusFatigue,
                   ),
                   _DayStat(
                     label: loc.trainingDayPH,
                     value: '+${plan.totalPH}',
                     color: AppColors.goldPrimary,
-                    icon: Icons.psychology_rounded,
+                    icon: AppIcons.trainingMind,
                   ),
                   _DayStat(
                     label: loc.trainingDayXP,
@@ -774,7 +775,7 @@ class _TrainingDayView extends ConsumerWidget {
                           color: styleColor.withOpacity(0.12),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.person_rounded,
+                        child: Icon(AppIcons.studentFill,
                             color: styleColor, size: 20),
                       ),
                       const SizedBox(width: 10),
@@ -837,10 +838,10 @@ class _TrainingDayView extends ConsumerWidget {
   };
 
   IconData _categoryIcon(ActivityCategory cat) => switch (cat) {
-    ActivityCategory.strength    => Icons.fitness_center_rounded,
+    ActivityCategory.strength    => AppIcons.trainingStrength,
     ActivityCategory.cardio      => Icons.directions_run_rounded,
     ActivityCategory.technique   => Icons.precision_manufacturing_rounded,
-    ActivityCategory.mindDefense => Icons.psychology_rounded,
+    ActivityCategory.mindDefense => AppIcons.trainingMind,
     ActivityCategory.combat      => Icons.sports_mma_rounded,
     ActivityCategory.recovery    => Icons.spa_rounded,
   };
@@ -924,7 +925,7 @@ class _TournamentDayView extends StatelessWidget {
                 border: Border.all(
                     color: AppColors.redAction.withOpacity(0.4), width: 2),
               ),
-              child: const Icon(Icons.emoji_events_rounded,
+              child: const Icon(AppIcons.fightWin,
                   color: AppColors.redLight, size: 36),
             ),
             const SizedBox(height: 16),
@@ -1268,7 +1269,7 @@ class _ActivityPickerSheetState extends State<_ActivityPickerSheet> {
                                     Padding(
                                       padding:
                                       const EdgeInsets.only(right: 4),
-                                      child: Icon(Icons.check_rounded,
+                                      child: Icon(AppIcons.actionConfirm,
                                           size: 11, color: catColor),
                                     ),
                                   Text(
@@ -1356,10 +1357,10 @@ class _ActivityPickerSheetState extends State<_ActivityPickerSheet> {
   };
 
   IconData _catIcon(ActivityCategory c) => switch (c) {
-    ActivityCategory.strength    => Icons.fitness_center_rounded,
+    ActivityCategory.strength    => AppIcons.trainingStrength,
     ActivityCategory.cardio      => Icons.directions_run_rounded,
     ActivityCategory.technique   => Icons.precision_manufacturing_rounded,
-    ActivityCategory.mindDefense => Icons.psychology_rounded,
+    ActivityCategory.mindDefense => AppIcons.trainingMind,
     ActivityCategory.combat      => Icons.sports_mma_rounded,
     ActivityCategory.recovery    => Icons.spa_rounded,
   };

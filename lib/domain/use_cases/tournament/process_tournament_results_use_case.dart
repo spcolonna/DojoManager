@@ -1,4 +1,7 @@
-import '../../entities/tournament.dart';
+
+import '../../entities/tournament/tournament.dart';
+import '../../entities/tournament/tournament_match.dart';
+import '../../entities/tournament/tournament_team.dart';
 
 /// Actualiza la tabla de posiciones después de un partido jugado.
 /// Devuelve el torneo actualizado con los nuevos puntos y stats de cada equipo.

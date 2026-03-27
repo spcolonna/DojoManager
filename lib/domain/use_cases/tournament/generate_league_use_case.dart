@@ -1,7 +1,8 @@
-import 'dart:math';
 import 'package:uuid/uuid.dart';
-import '../../entities/tournament.dart';
-import '../../entities/ai_opponent.dart';
+import '../../entities/ai/ai_opponent.dart';
+import '../../entities/tournament/tournament.dart';
+import '../../entities/tournament/tournament_match.dart';
+import '../../entities/tournament/tournament_team.dart';
 
 /// Genera la estructura completa de una liga (round-robin).
 /// Cada equipo juega contra todos los demás una vez.

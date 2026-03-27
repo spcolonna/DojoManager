@@ -1,11 +1,12 @@
 import 'dart:math';
-import '../../entities/tournament.dart';
-import '../../entities/ai_opponent.dart';
+import '../../entities/ai/aI_student.dart';
 import '../../entities/student.dart';
 import '../../entities/fight.dart';
-import '../../../core/config/fight_config.dart';
 import '../../../core/config/tournament_config.dart';
 import '../../../infrastructure/services/fight_simulation_service.dart';
+import '../../entities/tournament/fight_summary.dart';
+import '../../entities/tournament/tournament.dart';
+import '../../entities/tournament/tournament_match.dart';
 
 /// Simula un encuentro completo (3 peleas, best of 3).
 /// Funciona tanto para IA vs IA como para jugador vs IA.

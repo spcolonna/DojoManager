@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:grand_dojo/domain/entities/tournament/tournament.dart';
 
-import '../tournament.dart';
 import 'fight_summary.dart';
 
 class TournamentMatch extends Equatable {

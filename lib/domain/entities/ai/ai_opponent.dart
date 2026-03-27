@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'ai/aI_student.dart';
+
+import 'aI_student.dart';
 
 /// Rival controlado por la IA.
 /// No persiste en Firestore — se genera proceduralmente por división y semana.

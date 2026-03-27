@@ -59,22 +59,31 @@ class FightEvent {
 }
 
 class SliderValues {
-  final double attack;   // 0.0–1.0
-  final double defense;  // 0.0–1.0
-  final double mind;     // 0.0–1.0 (attack+defense+mind == 1.0)
+  final double attack;
+  final double defense;
+  final double mind;
 
   const SliderValues({
     required this.attack,
     required this.defense,
     required this.mind,
-  }) : assert(
-    (attack + defense + mind - 1.0).abs() < 0.01,
-    'Los tres sliders deben sumar 1.0',
-  );
+  });
 
   static const SliderValues balanced = SliderValues(
     attack: 0.34,
     defense: 0.33,
     mind: 0.33,
+  );
+
+  static const SliderValues aggressive = SliderValues(
+    attack: 0.60,
+    defense: 0.20,
+    mind: 0.20,
+  );
+
+  static const SliderValues defensive = SliderValues(
+    attack: 0.20,
+    defense: 0.60,
+    mind: 0.20,
   );
 }

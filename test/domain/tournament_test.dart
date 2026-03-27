@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grand_dojo/domain/entities/ai_opponent.dart';
-import 'package:grand_dojo/domain/entities/tournament.dart';
+import 'package:grand_dojo/domain/entities/ai/ai_opponent.dart';
+import 'package:grand_dojo/domain/entities/tournament/tournament.dart';
 import 'package:grand_dojo/domain/use_cases/tournament/generate_ai_opponents_use_case.dart';
 import 'package:grand_dojo/domain/use_cases/tournament/generate_league_use_case.dart';
 import 'package:grand_dojo/domain/use_cases/tournament/process_tournament_results_use_case.dart';
@@ -73,8 +73,12 @@ void main() {
     setUp(() {
       opponents = aiGen.execute(
         playerStyleId: 'karate', beltLevel: 1,
-        divisionLevel: 1, count: 7, seed: 42,
+        divisionLevel: 1,
+        count: 19,  // ahora 19 rivales para 20 equipos
+        seed: 42,
+        forceStyle: 'karate',  // liga local
       );
+      
       league = leagueGen.execute(
         playerDojoId: 'dojo_123',
         playerDojoName: 'Test Dojo',
@@ -87,8 +91,8 @@ void main() {
       );
     });
 
-    test('genera 8 equipos (1 jugador + 7 IA)', () {
-      expect(league.teams.length, 8);
+    test('genera 20 equipos (1 jugador + 19 IA)', () {
+      expect(league.teams.length, 20);
     });
 
     test('el equipo del jugador existe', () {
@@ -96,10 +100,13 @@ void main() {
       expect(league.playerTeam!.isPlayer, true);
     });
 
-    test('round-robin genera el número correcto de partidos', () {
-      // n equipos → n*(n-1)/2 partidos
-      final n = league.teams.length;
-      expect(league.matches.length, n * (n - 1) ~/ 2);
+    test('round-robin genera 190 partidos', () {
+      expect(league.matches.length, 190);
+    });
+
+    test('liga local: todos los rivales tienen el mismo estilo', () {
+      final rivals = league.teams.where((t) => !t.isPlayer);
+      expect(rivals.every((t) => t.styleId == 'karate'), true);
     });
 
     test('ningún equipo se enfrenta a sí mismo', () {

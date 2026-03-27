@@ -1,5 +1,6 @@
 import 'dart:math';
-import '../../entities/ai_opponent.dart';
+import '../../entities/ai/aI_student.dart';
+import '../../entities/ai/ai_opponent.dart';
 import '../../value_objects/student_stats.dart';
 import '../../value_objects/belt.dart';
 import '../../../core/config/tournament_config.dart';
@@ -15,29 +16,28 @@ class GenerateAIOpponentsUseCase {
     required int divisionLevel,
     required int count,
     required int seed,
+    String? forceStyle,  // null = inter-style (aleatorio), valor = liga local
   }) {
     final rng = Random(seed);
     final opponents = <AIOpponent>[];
 
-    // Estilos disponibles (el mismo que el jugador + otros para variedad)
     final styles = TournamentConfig.styleMatchupModifiers.keys.toList();
     if (!styles.contains(playerStyleId)) styles.add(playerStyleId);
 
     for (int i = 0; i < count; i++) {
-      final style = styles[rng.nextInt(styles.length)];
+      // Liga local → mismo estilo siempre
+      // Copa inter-estilos → estilo aleatorio (pero nunca el del jugador dos veces seguidas)
+      final style = forceStyle ?? styles[rng.nextInt(styles.length)];
       final name  = _generateTeamName(style, rng);
 
-      // Generar 2–3 luchadores por equipo rival
       final fighterCount = 2 + rng.nextInt(2);
-      final fighters = List.generate(fighterCount, (j) {
-        return _generateFighter(
-          id: 'ai_${seed}_${i}_$j',
-          styleId: style,
-          beltLevel: beltLevel,
-          divisionLevel: divisionLevel,
-          rng: rng,
-        );
-      });
+      final fighters = List.generate(fighterCount, (j) => _generateFighter(
+        id: 'ai_${seed}_${i}_$j',
+        styleId: style,
+        beltLevel: beltLevel,
+        divisionLevel: divisionLevel,
+        rng: rng,
+      ));
 
       opponents.add(AIOpponent(
         id: 'ai_team_${seed}_$i',

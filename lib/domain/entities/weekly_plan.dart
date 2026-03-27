@@ -1,3 +1,4 @@
+import '../../core/config/tournament_config.dart';
 import '../../core/config/training_activities_config.dart';
 
 /// Plan semanal del dojo.
@@ -37,17 +38,33 @@ class WeeklyPlan {
   }
 
   // Plan vacío por defecto — lunes a viernes libre, sábado torneo
-  factory WeeklyPlan.defaultPlan({required int season, required int week}) {
+  factory WeeklyPlan.defaultPlan({
+    required int season,
+    required int week,
+  }) {
+    final hasCopa = TournamentConfig.hasInterStyleCup(week);
+    final copaDayIndex = TournamentConfig.interStyleDayForWeek(week);
+    // 0=lunes, 1=martes, 2=miércoles, 3=jueves
+    final copaDay = DayOfWeek.values[copaDayIndex];
+
     return WeeklyPlan(
       season: season,
       week: week,
       days: {
-        DayOfWeek.monday:    DayPlan.empty(DayOfWeek.monday),
-        DayOfWeek.tuesday:   DayPlan.empty(DayOfWeek.tuesday),
-        DayOfWeek.wednesday: DayPlan.empty(DayOfWeek.wednesday),
-        DayOfWeek.thursday:  DayPlan.empty(DayOfWeek.thursday),
+        DayOfWeek.monday: hasCopa && copaDay == DayOfWeek.monday
+            ? DayPlan.tournament(DayOfWeek.monday)
+            : DayPlan.empty(DayOfWeek.monday),
+        DayOfWeek.tuesday: hasCopa && copaDay == DayOfWeek.tuesday
+            ? DayPlan.tournament(DayOfWeek.tuesday)
+            : DayPlan.empty(DayOfWeek.tuesday),
+        DayOfWeek.wednesday: hasCopa && copaDay == DayOfWeek.wednesday
+            ? DayPlan.tournament(DayOfWeek.wednesday)
+            : DayPlan.empty(DayOfWeek.wednesday),
+        DayOfWeek.thursday: hasCopa && copaDay == DayOfWeek.thursday
+            ? DayPlan.tournament(DayOfWeek.thursday)
+            : DayPlan.empty(DayOfWeek.thursday),
         DayOfWeek.friday:    DayPlan.empty(DayOfWeek.friday),
-        DayOfWeek.saturday:  DayPlan.tournament(DayOfWeek.saturday),
+        DayOfWeek.saturday:  DayPlan.tournament(DayOfWeek.saturday), // liga local siempre
         DayOfWeek.sunday:    DayPlan.rest(DayOfWeek.sunday),
       },
     );

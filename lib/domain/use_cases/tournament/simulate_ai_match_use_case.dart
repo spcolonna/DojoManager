@@ -1,8 +1,9 @@
 import 'dart:math';
+import '../../../core/config/tournament_config.dart';
 import '../../entities/ai/aI_student.dart';
+import '../../entities/fight_fighter.dart';
 import '../../entities/student.dart';
 import '../../entities/fight.dart';
-import '../../../core/config/tournament_config.dart';
 import '../../../infrastructure/services/fight_simulation_service.dart';
 import '../../entities/tournament/fight_summary.dart';
 import '../../entities/tournament/tournament.dart';
@@ -105,52 +106,46 @@ class SimulateAIMatchUseCase {
     required FightStrategy awayStrategy,
     required int seed,
   }) {
-    // Convertir AIStudent a Student si es necesario
-    final home = _toFightableStudent(homeFighter, homeStyleId);
-    final away = _toFightableStudent(awayFighter, awayStyleId);
+    // Convertir a FightFighter según el tipo
+    final blue = homeFighter is Student
+        ? FightFighter.fromStudent(homeFighter)
+        : FightFighter.fromAI(homeFighter as AIStudent);
+
+    final red = awayFighter is Student
+        ? FightFighter.fromStudent(awayFighter)
+        : FightFighter.fromAI(awayFighter as AIStudent);
 
     return _fightService.simulateFight(
-      blue: home,
-      red: away,
+      blue: blue,
+      red: red,
       blueStrategy: homeStrategy,
       redStrategy: awayStrategy,
       seed: seed,
     );
   }
 
-  // Elige la mejor estrategia para un luchador según sus stats dominantes
+// Actualizá también _bestStrategy y _idOf:
   FightStrategy _bestStrategy(dynamic fighter) {
-    final stats = _statsOf(fighter);
-    final maxStat = {
-      'str': stats.str, 'spd': stats.spd, 'tec': stats.tec,
-      'def': stats.def, 'men': stats.men,
-    }.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+    final stats = fighter is Student
+        ? fighter.stats.toMap()
+        : (fighter as AIStudent).stats.toMap();
 
-    return switch (maxStat) {
-      'str' => FightStrategy.aggressive,
+    final dominant = stats.entries
+        .reduce((a, b) => a.value > b.value ? a : b).key;
+
+    return switch (dominant) {
+      'str' => FightStrategy.grappling,
       'spd' => FightStrategy.aggressive,
       'tec' => FightStrategy.technical,
       'def' => FightStrategy.defensive,
-      'men' => FightStrategy.adaptive,
+      'men' => FightStrategy.technical,
       _     => FightStrategy.technical,
     };
   }
 
-  dynamic _toFightableStudent(dynamic fighter, String styleId) {
-    if (fighter is Student) return fighter;
-    // Es un AIStudent — construir un Student lightweight para la simulación
-    return _AIStudentAdapter(fighter as AIStudent, styleId);
-  }
-
-  dynamic _statsOf(dynamic fighter) {
-    if (fighter is Student) return fighter.stats;
-    return (fighter as AIStudent).stats;
-  }
-
-  String _idOf(dynamic fighter) {
-    if (fighter is Student) return fighter.id;
-    return (fighter as AIStudent).id;
-  }
+  String _idOf(dynamic fighter) => fighter is Student
+      ? fighter.id
+      : (fighter as AIStudent).id;
 }
 
 class MatchSimulationResult {

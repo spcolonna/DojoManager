@@ -164,7 +164,7 @@ class TrainingActivitiesConfig {
       statBonus: {'str': 1, 'spd': 1, 'tec': 1},
       fatigueAdd: 25,
       phBonus: 4,
-      xpBonus: 40,
+      xpBonus: 20,
     ),
     TrainingActivity(
       id: 'controlled_combat',
@@ -175,7 +175,7 @@ class TrainingActivitiesConfig {
       statBonus: {'tec': 2, 'men': 1},
       fatigueAdd: 18,
       phBonus: 3,
-      xpBonus: 25,
+      xpBonus: 12,
     ),
     TrainingActivity(
       id: 'strategy_session',
@@ -219,21 +219,11 @@ class TrainingActivitiesConfig {
   ];
 
   // ── LÍMITES DE LA SEMANA ──────────────────────────────────────────────────
-  /// Máximo de actividades asignables por estudiante por semana.
-  static const int maxActivitiesPerWeek = 5;
-
-  /// Fatiga máxima antes de riesgo de lesión.
+  static const int maxActivitiesPerWeek   = 5;
   static const int fatigueInjuryThreshold = 85;
-
-  /// Riesgo de lesión (%) cuando se supera el threshold.
-  static const int injuryRiskPercent = 8;
-
-  // ── PH BASE POR ACTIVIDAD ─────────────────────────────────────────────────
-  /// PH base que se gana por cada actividad (además del phBonus específico).
-  static const int basePHPerActivity = 1;
-
-  // ── XP BASE POR ACTIVIDAD ─────────────────────────────────────────────────
-  static const int baseXPPerActivity = 15;
+  static const int injuryRiskPercent      = 8;
+  static const int basePHPerActivity      = 1;
+  static const int baseXPPerActivity      = 8;
 
   // ── HELPERS ───────────────────────────────────────────────────────────────
   static List<TrainingActivity> byCategory(ActivityCategory cat) =>

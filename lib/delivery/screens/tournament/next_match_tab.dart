@@ -55,6 +55,8 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
         .where((t) => t.id == rivalTeamId)
         .firstOrNull;
     final rival = ref.read(tournamentProvider.notifier).rivalFor(rivalTeamId);
+    final rivalStyleColor =
+        AppColors.colorByStyle[rivalTeam?.styleId ?? ''] ?? AppColors.redLight;
 
     return studentsAsync.when(
       loading: () => const Center(
@@ -68,10 +70,13 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF2C0A0A), Color(0xFF1A0505)],
+                  colors: [
+                    rivalStyleColor.withOpacity(0.12),
+                    AppColors.bgDeep,
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
@@ -82,8 +87,8 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                   Text(
                     loc.tournamentStyleLeague.toUpperCase(),
                     style: GoogleFonts.rajdhani(
-                      fontSize: 10,
-                      color: AppColors.textTertiary,
+                      fontSize: 15,
+                      color: AppColors.textPrimary,
                       letterSpacing: 2,
                     ),
                   ),
@@ -139,13 +144,11 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                             Container(
                               width: 52, height: 52,
                               decoration: BoxDecoration(
-                                color: AppColors.redAction.withOpacity(0.15),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: AppColors.redAction.withOpacity(0.5)),
+                                color: rivalStyleColor.withOpacity(0.15),
+                                border: Border.all(color: rivalStyleColor.withOpacity(0.5)),
                               ),
-                              child: const Icon(Icons.sports_mma_rounded,
-                                  color: AppColors.redLight, size: 26),
+                              child: Icon(Icons.sports_mma_rounded,
+                                  color: rivalStyleColor, size: 26),
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -154,7 +157,7 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                               style: GoogleFonts.rajdhani(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.redLight,
+                                color: rivalStyleColor,
                               ),
                             ),
                           ],
@@ -283,8 +286,8 @@ class _RivalScout extends StatelessWidget {
                 style: GoogleFonts.rajdhani(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textTertiary,
-                  letterSpacing: 1.5,
+                  color: Colors.white,
+                  letterSpacing: 2,
                 ),
               ),
             ],
@@ -476,7 +479,7 @@ class _EnrollmentSectionState extends State<_EnrollmentSection> {
                 style: GoogleFonts.rajdhani(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textTertiary,
+                  color: AppColors.textPrimary,
                   letterSpacing: 1.5,
                 ),
               ),

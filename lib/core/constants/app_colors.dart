@@ -97,15 +97,15 @@ class AppColors {
     10: beltBlack,
   };
 
-  // ─── ESTILOS MARCIALES ────────────────────────────────────────────────────
-  static const Color styleKungFu    = accent;
-  static const Color styleKarate    = Color(0xFFE0E0E0);
-  static const Color styleTaekwondo = Color(0xFF42A5F5);
-  static const Color styleJudo      = Color(0xFF90A4AE);
-  static const Color styleMuayThai  = primary;
-  static const Color styleBjj       = Color(0xFF1E88E5);
-  static const Color styleBoxing    = secondary;
-  static const Color styleMma       = Color(0xFF9E9E9E);
+  // ─── ESTILOS MARCIALES ────────────────────────────────────────────────────────
+  static const Color styleKungFu    = Color(0xFFD4780A);  // Saffron Shaolin
+  static const Color styleKarate    = Color(0xFFB52320);  // Carmesí
+  static const Color styleTaekwondo = Color(0xFF1A7FC1);  // Azul Coreano
+  static const Color styleJudo      = Color(0xFF2A7A4B);  // Verde Tatami
+  static const Color styleMuayThai  = Color(0xFFE03010);  // Rojo Fuego
+  static const Color styleBjj       = Color(0xFF7B2D8B);  // Morado BJJ
+  static const Color styleBoxing    = Color(0xFFC68B0A);  // Ámbar Campeón
+  static const Color styleMma       = Color(0xFF00897B);  // Teal Síntesis
 
   static const Map<String, Color> colorByStyle = {
     'kung_fu':    styleKungFu,

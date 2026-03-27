@@ -55,6 +55,8 @@ class ResultsTab extends StatelessWidget {
 
         final playerScore = isHome ? match.homePoints : match.awayPoints;
         final rivalScore  = isHome ? match.awayPoints : match.homePoints;
+        final rivalStyleColor =
+            AppColors.colorByStyle[rivalTeam.styleId] ?? AppColors.textTertiary;
 
         final resultColor = isDraw
             ? AppColors.info
@@ -131,8 +133,15 @@ class ResultsTab extends StatelessWidget {
               // Rival
               Row(
                 children: [
-                  const Icon(Icons.sports_mma_rounded,
-                      color: AppColors.textTertiary, size: 14),
+                  Icon(Icons.sports_mma_rounded,
+                      color: rivalStyleColor, size: 14),
+                  Text(
+                    rivalTeam.name,
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 14,
+                      color: rivalStyleColor, 
+                    ),
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     rivalTeam.name,

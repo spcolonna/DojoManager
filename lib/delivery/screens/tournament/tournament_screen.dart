@@ -60,7 +60,9 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
                 loc.tournamentRound(tournament.week),
                 style: GoogleFonts.rajdhani(
                   fontSize: 10,
-                  color: AppColors.textTertiary,
+                  color: AppColors.textSecondary,  // más claro
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
                 ),
               ),
           ],

@@ -6,6 +6,7 @@ import '../../core/utils/l10n_helper.dart';
 import '../../core/utils/belt_helper.dart';
 import '../../core/providers/dojo_provider.dart';
 import '../../core/providers/tournament_provider.dart';
+import '../screens/training/training_view_model.dart';
 
 class NoTournamentView extends ConsumerWidget {
   const NoTournamentView({super.key});
@@ -139,9 +140,16 @@ class NoTournamentView extends ConsumerWidget {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () => ref
-                                .read(tournamentProvider.notifier)
-                                .initLeague(),
+                            onPressed: () async {
+                              // ← Capturar antes del await
+                              final notifier = ref.read(tournamentProvider.notifier);
+                              final trainingNotifier = ref.read(trainingViewModelProvider.notifier);
+
+                              await notifier.initLeague();
+
+                              // Ya no usamos ref acá — usamos las referencias capturadas
+                              trainingNotifier.reloadPlan();
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: styleColor,
                               foregroundColor: Colors.black,

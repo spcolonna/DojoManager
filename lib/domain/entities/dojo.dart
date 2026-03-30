@@ -5,7 +5,7 @@ class Dojo extends Equatable {
   final String ownerId;
   final String name;
   final String styleId;
-  final int level;              // calculado por la media de fajas
+  final int level;              
   final int md;                 // Monedas de Dojo
   final int gm;                 // Gemas del Maestro
   final List<String> unlockedUpgradeIds;
@@ -13,6 +13,7 @@ class Dojo extends Equatable {
   final int currentSeason;
   final int currentWeek;
   final bool hasActiveMasterPass;
+  final bool tournamentActive;
 
   const Dojo({
     required this.id,
@@ -27,6 +28,7 @@ class Dojo extends Equatable {
     required this.currentSeason,
     required this.currentWeek,
     required this.hasActiveMasterPass,
+    this.tournamentActive = false,
   });
 
   Dojo copyWith({
@@ -34,6 +36,7 @@ class Dojo extends Equatable {
     int? level, int? md, int? gm, List<String>? unlockedUpgradeIds,
     int? maxStudentSlots, int? currentSeason, int? currentWeek,
     bool? hasActiveMasterPass,
+    bool? tournamentActive,
   }) => Dojo(
     id: id ?? this.id,
     ownerId: ownerId ?? this.ownerId,
@@ -47,6 +50,7 @@ class Dojo extends Equatable {
     currentSeason: currentSeason ?? this.currentSeason,
     currentWeek: currentWeek ?? this.currentWeek,
     hasActiveMasterPass: hasActiveMasterPass ?? this.hasActiveMasterPass,
+    tournamentActive: tournamentActive ?? this.tournamentActive,
   );
 
   Map<String, dynamic> toMap() => {
@@ -57,6 +61,7 @@ class Dojo extends Equatable {
     'currentSeason': currentSeason,
     'currentWeek': currentWeek,
     'hasActiveMasterPass': hasActiveMasterPass,
+    'tournamentActive': tournamentActive,
   };
 
   factory Dojo.fromMap(Map<String, dynamic> map) => Dojo(
@@ -72,6 +77,7 @@ class Dojo extends Equatable {
     currentSeason: map['currentSeason'] ?? 1,
     currentWeek: map['currentWeek'] ?? 1,
     hasActiveMasterPass: map['hasActiveMasterPass'] ?? false,
+    tournamentActive: map['tournamentActive'] ?? false,
   );
 
   @override

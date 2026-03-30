@@ -179,6 +179,10 @@ class TrainingViewModel extends StateNotifier<TrainingState> {
       DayOfWeek.sunday    => loc.daySunday,
     };
   }
+
+  Future<void> reloadPlan() async {
+    await _loadPlan();
+  }
 }
 
 final trainingViewModelProvider =

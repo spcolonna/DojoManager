@@ -6,6 +6,7 @@ import '../../../core/animations/app_animations.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/providers/navigation_provider.dart';
+import '../../../core/providers/tournament_provider.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/config/training_activities_config.dart';
 import '../../../core/providers/dojo_provider.dart';
@@ -802,45 +803,330 @@ class _DayStat extends StatelessWidget {
 
 // ─── VISTAS DE TORNEO Y DESCANSO ──────────────────────────────────────────────
 
-class _TournamentDayView extends StatelessWidget {
+class _TournamentDayView extends ConsumerWidget {
   final String dayName;
   final dynamic loc;
   const _TournamentDayView({required this.dayName, required this.loc});
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72, height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.redAction.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: AppColors.redAction.withValues(alpha: 0.4), width: 2),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tournament = ref.watch(tournamentProvider);
+    final nextMatch  = ref.read(tournamentProvider.notifier).nextPlayerMatch;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          // ── Header del día ──────────────────────────────────────
+          Row(
+            children: [
+              Container(
+                width: 48, height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.redAction.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: AppColors.redAction.withValues(alpha: 0.4)),
+                ),
+                child: const Icon(Icons.emoji_events_rounded,
+                    color: AppColors.redLight, size: 24),
               ),
-              child: const Icon(AppIcons.fightWin,
-                  color: AppColors.redLight, size: 36),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dayName,
+                      style: GoogleFonts.cinzelDecorative(
+                          fontSize: 18, fontWeight: FontWeight.bold,
+                          color: AppColors.goldLight)),
+                  Text(
+                    loc.tournamentStyleLeague,
+                    style: GoogleFonts.rajdhani(
+                        fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          if (tournament == null || nextMatch == null) ...[
+            // Sin torneo activo
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.bgSurface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.bgDivider),
+              ),
+              child: Text(
+                loc.trainingStopped,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.rajdhani(
+                    fontSize: 13, color: AppColors.textSecondary, height: 1.5),
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(dayName,
+          ] else ...[
+            // ── Partido del día ──────────────────────────────────
+            _MatchPreviewCard(
+                tournament: tournament, nextMatch: nextMatch, loc: loc),
+          ],
+
+          const SizedBox(height: 16),
+
+          // ── Botón ir al torneo ────────────────────────────────
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () =>
+              ref.read(navigationProvider.notifier).state = 2,
+              icon: const Icon(Icons.emoji_events_rounded, size: 16),
+              label: Text(
+                loc.tournamentSimulateMatch,
+                style: GoogleFonts.rajdhani(
+                    fontSize: 14, fontWeight: FontWeight.w800,
+                    letterSpacing: 1),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.redAction,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MatchPreviewCard extends StatelessWidget {
+  final dynamic tournament;
+  final dynamic nextMatch;
+  final dynamic loc;
+  const _MatchPreviewCard({
+    required this.tournament,
+    required this.nextMatch,
+    required this.loc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final playerTeamId = tournament.playerTeam?.id ?? '';
+    final isHome       = nextMatch.homeTeamId == playerTeamId;
+    final rivalTeamId  = isHome ? nextMatch.awayTeamId : nextMatch.homeTeamId;
+    final rivalList = (tournament.teams as List)
+        .where((t) => t.id == rivalTeamId)
+        .toList();
+    final rivalTeam = rivalList.isEmpty ? null : rivalList.first;
+    final rivalStyleColor =
+        AppColors.colorByStyle[rivalTeam?.styleId ?? ''] ?? AppColors.redLight;
+
+    // Posición del jugador en la tabla
+    final playerPos = tournament.teams
+        .indexWhere((t) => t.id == playerTeamId) +
+        1;
+    final playerList = (tournament.teams as List)
+        .where((t) => t.id == playerTeamId)
+        .toList();
+    final playerTeam = playerList.isEmpty ? null : playerList.first;
+    
+    return Column(
+      children: [
+        // Banner VS
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                rivalStyleColor.withValues(alpha: 0.12),
+                AppColors.bgDeep,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+                color: rivalStyleColor.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            children: [
+              // Tu equipo
+              Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 44, height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.goldPrimary.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: AppColors.goldPrimary.withValues(alpha: 0.5)),
+                      ),
+                      child: const Icon(Icons.home_work_rounded,
+                          color: AppColors.goldLight, size: 22),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      tournament.playerTeam?.name ?? '',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.rajdhani(
+                          fontSize: 11, fontWeight: FontWeight.w700,
+                          color: AppColors.goldLight),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // VS
+              Text(
+                loc.tournamentVs.toUpperCase(),
                 style: GoogleFonts.cinzelDecorative(
                     fontSize: 18, fontWeight: FontWeight.bold,
-                    color: AppColors.goldLight)),
-            const SizedBox(height: 8),
-            Text(
-              loc.trainingStopped,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.rajdhani(
-                  fontSize: 13, color: AppColors.textSecondary, height: 1.5),
+                    color: AppColors.redAction),
+              ),
+              // Rival
+              Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 44, height: 44,
+                      decoration: BoxDecoration(
+                        color: rivalStyleColor.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: rivalStyleColor.withValues(alpha: 0.5)),
+                      ),
+                      child: Icon(Icons.sports_mma_rounded,
+                          color: rivalStyleColor, size: 22),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      rivalTeam?.name ?? '',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.rajdhani(
+                          fontSize: 11, fontWeight: FontWeight.w700,
+                          color: rivalStyleColor),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Stats del rival + posición en la tabla
+        Row(
+          children: [
+            // Tu posición
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12, horizontal: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.bgSurface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.bgDivider),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '#$playerPos',
+                      style: GoogleFonts.cinzelDecorative(
+                          fontSize: 22, fontWeight: FontWeight.bold,
+                          color: playerPos <= 4
+                              ? AppColors.goldPrimary
+                              : AppColors.textSecondary),
+                    ),
+                    Text('Tu posición',
+                        style: GoogleFonts.rajdhani(
+                            fontSize: 9, color: AppColors.textTertiary,
+                            letterSpacing: 0.5)),
+                    const SizedBox(height: 4),
+                    if (playerTeam != null)
+                      Text(
+                        '${playerTeam.points} pts · ${playerTeam.wins}G ${playerTeam.draws}E ${playerTeam.losses}P',
+                        style: GoogleFonts.rajdhani(
+                            fontSize: 10, color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Rival posición
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12, horizontal: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.bgSurface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: rivalStyleColor.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '#${tournament.teams.indexWhere((t) => t.id == rivalTeamId) + 1}',
+                      style: GoogleFonts.cinzelDecorative(
+                          fontSize: 22, fontWeight: FontWeight.bold,
+                          color: rivalStyleColor),
+                    ),
+                    Text('Rival',
+                        style: GoogleFonts.rajdhani(
+                            fontSize: 9, color: AppColors.textTertiary,
+                            letterSpacing: 0.5)),
+                    const SizedBox(height: 4),
+                    if (rivalTeam != null)
+                      Text(
+                        '${rivalTeam.points} pts · ${rivalTeam.wins}G ${rivalTeam.draws}E ${rivalTeam.losses}P',
+                        style: GoogleFonts.rajdhani(
+                            fontSize: 10, color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
-      ),
+
+        const SizedBox(height: 10),
+
+        // Fecha del partido
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: AppColors.bgSurface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.bgDivider),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.calendar_today_rounded,
+                  color: AppColors.textTertiary, size: 12),
+              const SizedBox(width: 6),
+              Text(
+                loc.tournamentRound(nextMatch.round),
+                style: GoogleFonts.rajdhani(
+                    fontSize: 12, color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

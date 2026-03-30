@@ -44,9 +44,9 @@ class StudentPreviewCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: styleColor.withOpacity(0.1),
+              color: styleColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: styleColor.withOpacity(0.3)),
+              border: Border.all(color: styleColor.withValues(alpha: 0.3)),
             ),
             child: Icon(PhosphorIconsRegular.user, color: styleColor, size: 26),
           ),
@@ -73,7 +73,7 @@ class StudentPreviewCard extends StatelessWidget {
                         color: beltColor,
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.2), width: 1),
+                            color: Colors.white.withValues(alpha: 0.2), width: 1),
                       ),
                     ),
                     const SizedBox(width: 4),

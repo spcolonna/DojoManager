@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../core/animations/app_animations.dart'; 
+import 'package:google_fonts/google_fonts.dart'; 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/utils/l10n_helper.dart';
@@ -45,9 +44,7 @@ class _WeekResultsScreenState extends ConsumerState<WeekResultsScreen>
   @override
   Widget build(BuildContext context) {
     final loc         = l10n(context);
-    final studentsAsync = ref.watch(studentsProvider);
     final totalPH     = widget.results.fold(0, (sum, r) => sum + r.phGained);
-    final anyLevelUp  = widget.results.any((r) => r.leveledUp);
 
     return Scaffold(
       backgroundColor: AppColors.bgDeep,
@@ -66,10 +63,10 @@ class _WeekResultsScreenState extends ConsumerState<WeekResultsScreen>
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: AppColors.goldPrimary.withOpacity(0.15),
+                        color: AppColors.goldPrimary.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: AppColors.goldPrimary.withOpacity(0.5),
+                            color: AppColors.goldPrimary.withValues(alpha: 0.5),
                             width: 2),
                       ),
                       child: const Icon(AppIcons.actionConfirm,
@@ -91,10 +88,10 @@ class _WeekResultsScreenState extends ConsumerState<WeekResultsScreen>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.goldPrimary.withOpacity(0.1),
+                          color: AppColors.goldPrimary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: AppColors.goldPrimary.withOpacity(0.3)),
+                              color: AppColors.goldPrimary.withValues(alpha: 0.3)),
                         ),
                         child: Text(
                           '+$totalPH PH disponibles',
@@ -210,7 +207,7 @@ class _ResultCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: result.leveledUp
-              ? AppColors.goldPrimary.withOpacity(0.5)
+              ? AppColors.goldPrimary.withValues(alpha: 0.5)
               : AppColors.bgDivider,
           width: result.leveledUp ? 1.5 : 1,
         ),
@@ -233,10 +230,10 @@ class _ResultCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.goldPrimary.withOpacity(0.15),
+                    color: AppColors.goldPrimary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: AppColors.goldPrimary.withOpacity(0.4)),
+                        color: AppColors.goldPrimary.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -308,7 +305,7 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

@@ -5,7 +5,6 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/config/shop_config.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/providers/shop_provider.dart';
-import '../../../core/providers/dojo_provider.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/utils/belt_helper.dart';
 import 'content_chip.dart';
@@ -82,7 +81,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                         vertical: 7, horizontal: 16),
-                    color: AppColors.warning.withOpacity(0.15),
+                    color: AppColors.warning.withValues(alpha: 0.15),
                     child: Text(
                       loc.shopSimulationBanner,
                       style: GoogleFonts.rajdhani(
@@ -159,7 +158,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           if (shopState.isPurchasing)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 child: const Center(
                   child: CircularProgressIndicator(
                       color: AppColors.goldPrimary),
@@ -222,14 +221,14 @@ class _DailyOfferSection extends ConsumerWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.success.withOpacity(0.15),
+            AppColors.success.withValues(alpha: 0.15),
             AppColors.bgSurface,
           ],
         ),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: canClaim
-              ? AppColors.success.withOpacity(0.5)
+              ? AppColors.success.withValues(alpha: 0.5)
               : AppColors.bgDivider,
           width: canClaim ? 1.5 : 1,
         ),
@@ -240,10 +239,10 @@ class _DailyOfferSection extends ConsumerWidget {
           Container(
             width: 56, height: 56,
             decoration: BoxDecoration(
-              color: AppColors.success.withOpacity(0.15),
+              color: AppColors.success.withValues(alpha: 0.15),
               shape: BoxShape.circle,
               border: Border.all(
-                  color: AppColors.success.withOpacity(0.4)),
+                  color: AppColors.success.withValues(alpha: 0.4)),
             ),
             child: const Icon(Icons.card_giftcard_rounded,
                 color: AppColors.success, size: 28),
@@ -315,7 +314,6 @@ class _FeaturedStudentsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final seed     = ShopConfig.featuredStudentSeed();
     final nextChange = DateTime(
         DateTime.now().year, DateTime.now().month,
         (DateTime.now().day ~/ 2) * 2 + 2);
@@ -387,11 +385,11 @@ class _FeaturedStudentCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: styleColor.withOpacity(0.3)),
+        border: Border.all(color: styleColor.withValues(alpha: 0.3)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [styleColor.withOpacity(0.08), AppColors.bgSurface],
+          colors: [styleColor.withValues(alpha: 0.08), AppColors.bgSurface],
         ),
       ),
       child: Column(
@@ -403,9 +401,9 @@ class _FeaturedStudentCard extends ConsumerWidget {
               Container(
                 width: 40, height: 40,
                 decoration: BoxDecoration(
-                  color: styleColor.withOpacity(0.15),
+                  color: styleColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
-                  border: Border.all(color: styleColor.withOpacity(0.4)),
+                  border: Border.all(color: styleColor.withValues(alpha: 0.4)),
                 ),
                 child: Icon(Icons.person_rounded,
                     color: styleColor, size: 22),
@@ -415,10 +413,10 @@ class _FeaturedStudentCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: tierColor.withOpacity(0.15),
+                  color: tierColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                      color: tierColor.withOpacity(0.4)),
+                      color: tierColor.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   offer.tier,
@@ -604,7 +602,7 @@ class _MasterPassSection extends ConsumerWidget {
           colors: [Color(0xFF1A0A2E), Color(0xFF0A0A1A)],
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.purple.withOpacity(0.5)),
+        border: Border.all(color: AppColors.purple.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -702,7 +700,7 @@ class _PassButton extends ConsumerWidget {
         ElevatedButton(
           onPressed: () => ref.read(shopProvider.notifier).purchasePass(pass),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.purple.withOpacity(0.8),
+            backgroundColor: AppColors.purple.withValues(alpha: 0.8),
             foregroundColor: Colors.white,
             minimumSize: const Size(double.infinity, 42),
             shape: RoundedRectangleBorder(
@@ -776,10 +774,10 @@ class _ComboCard extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [color.withOpacity(0.15), AppColors.bgSurface],
+          colors: [color.withValues(alpha: 0.15), AppColors.bgSurface],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
       ),
       child: Row(
         children: [
@@ -907,7 +905,7 @@ class _ContentChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(text, style: GoogleFonts.rajdhani(
@@ -933,7 +931,7 @@ class _GemCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
             color: package.tag != null
-                ? AppColors.infoLight.withOpacity(0.4)
+                ? AppColors.infoLight.withValues(alpha: 0.4)
                 : AppColors.bgDivider),
       ),
       child: Row(
@@ -1014,7 +1012,7 @@ class _MDCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
             color: package.tag != null
-                ? AppColors.goldPrimary.withOpacity(0.4)
+                ? AppColors.goldPrimary.withValues(alpha: 0.4)
                 : AppColors.bgDivider),
       ),
       child: Row(
@@ -1108,7 +1106,7 @@ class _SpecialItemCard extends ConsumerWidget {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(
-              color: AppColors.purple.withOpacity(0.15),
+              color: AppColors.purple.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.auto_awesome_rounded,
@@ -1139,14 +1137,14 @@ class _SpecialItemCard extends ConsumerWidget {
                   .read(shopProvider.notifier)
                   .purchaseItem(item),
               style: ElevatedButton.styleFrom(
-                backgroundColor: costColor.withOpacity(0.15),
+                backgroundColor: costColor.withValues(alpha: 0.15),
                 foregroundColor: costColor,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                     side: BorderSide(
-                        color: costColor.withOpacity(0.4))),
+                        color: costColor.withValues(alpha: 0.4))),
               ),
               child: Text(costLabel,
                   style: GoogleFonts.rajdhani(

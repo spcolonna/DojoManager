@@ -78,12 +78,12 @@ class StandingsTab extends StatelessWidget {
                   horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isPlayer
-                    ? AppColors.goldPrimary.withOpacity(0.07)
+                    ? AppColors.goldPrimary.withValues(alpha: 0.07)
                     : AppColors.bgSurface,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: isPlayer
-                      ? AppColors.goldPrimary.withOpacity(0.3)
+                      ? AppColors.goldPrimary.withValues(alpha: 0.3)
                       : AppColors.bgDivider,
                   width: isPlayer ? 1.5 : 1,
                 ),

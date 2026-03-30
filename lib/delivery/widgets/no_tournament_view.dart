@@ -35,10 +35,10 @@ class NoTournamentView extends ConsumerWidget {
                 Container(
                   width: 80, height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.redAction.withOpacity(0.1),
+                    color: AppColors.redAction.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: AppColors.redAction.withOpacity(0.3), width: 2),
+                        color: AppColors.redAction.withValues(alpha: 0.3), width: 2),
                   ),
                   child: const Icon(Icons.emoji_events_rounded,
                       color: AppColors.redLight, size: 40),
@@ -99,10 +99,10 @@ class NoTournamentView extends ConsumerWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: styleColor.withOpacity(0.08),
+                      color: styleColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                          color: styleColor.withOpacity(0.4), width: 1.5),
+                          color: styleColor.withValues(alpha: 0.4), width: 1.5),
                     ),
                     child: Column(
                       children: [

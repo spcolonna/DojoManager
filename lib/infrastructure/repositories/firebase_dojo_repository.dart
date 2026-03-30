@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../domain/entities/dojo.dart';
 import '../../domain/entities/student.dart';
 import '../../domain/entities/user_progress.dart';
+import '../../domain/entities/weekly_plan.dart';
 import '../../domain/value_objects/student_stats.dart';
 import '../../domain/value_objects/belt.dart';
 
@@ -173,6 +174,67 @@ class FirebaseDojoRepository {
     await _db.collection('dojos').doc(dojoId).update({
       'gm': FieldValue.increment(-amount),
     });
+  }
+
+  // ─── WEEKLY PLAN ──────────────────────────────────────────────────────────
+
+  Future<WeeklyPlan?> getWeeklyPlan(String dojoId) async {
+    try {
+      final doc = await _db
+          .collection('dojos')
+          .doc(dojoId)
+          .collection('weekly')
+          .doc('current')
+          .get();
+      if (!doc.exists) return null;
+      return WeeklyPlan.fromMap(doc.data()!);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> saveWeeklyPlan(String dojoId, WeeklyPlan plan) async {
+    await _db
+        .collection('dojos')
+        .doc(dojoId)
+        .collection('weekly')
+        .doc('current')
+        .set(plan.toMap());
+  }
+
+  Future<void> clearWeeklyPlan(String dojoId) async {
+    await _db
+        .collection('dojos')
+        .doc(dojoId)
+        .collection('weekly')
+        .doc('current')
+        .delete();
+  }
+
+// ─── TOURNAMENT STATE ─────────────────────────────────────────────────────
+
+  Future<void> saveTournamentState(String dojoId, Map<String, dynamic> data) async {
+    await _db
+        .collection('dojos')
+        .doc(dojoId)
+        .collection('tournament')
+        .doc('current')
+        .set(data);
+  }
+
+  Future<Map<String, dynamic>?> getTournamentState(String dojoId) async {
+    try {
+      final doc = await _db
+          .collection('dojos')
+          .doc(dojoId)
+          .collection('tournament')
+          .doc('current')
+          .get();
+      if (!doc.exists) return null;
+      return doc.data();
+    } catch (_) {
+      return null;
+    }
   }
 
   // ─── FICHAR ESTUDIANTE DESDE OFERTA ──────────────────────────────────────

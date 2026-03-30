@@ -36,7 +36,7 @@ class StudentHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            styleColor.withOpacity(0.20),
+            styleColor.withValues(alpha: 0.20),
             AppColors.bgSurface,
           ],
         ),
@@ -47,12 +47,12 @@ class StudentHeader extends StatelessWidget {
           Container(
             width: 72, height: 72,
             decoration: BoxDecoration(
-              color: styleColor.withOpacity(0.15),
+              color: styleColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: styleColor.withOpacity(0.5), width: 2),
+              border: Border.all(color: styleColor.withValues(alpha: 0.5), width: 2),
               boxShadow: [
                 BoxShadow(
-                  color: styleColor.withOpacity(0.25),
+                  color: styleColor.withValues(alpha: 0.25),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),

@@ -119,7 +119,7 @@ class _DojoMapMarkerState extends State<DojoMapMarker>
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: _markerColor
-                                  .withOpacity(_pulseOpacity.value),
+                                  .withValues(alpha: _pulseOpacity.value),
                               width: 2,
                             ),
                           ),
@@ -143,7 +143,7 @@ class _DojoMapMarkerState extends State<DojoMapMarker>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: _markerColor.withOpacity(opacity),
+                                color: _markerColor.withValues(alpha: opacity),
                                 width: 1.5,
                               ),
                             ),
@@ -159,15 +159,15 @@ class _DojoMapMarkerState extends State<DojoMapMarker>
                       decoration: BoxDecoration(
                         color: widget.isSelected
                             ? _markerColor
-                            : _markerColor.withOpacity(0.85),
+                            : _markerColor.withValues(alpha: 0.85),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: _markerColor.withOpacity(0.5),
+                            color: _markerColor.withValues(alpha: 0.5),
                             blurRadius: 12,
                             spreadRadius: 2,
                           ),
@@ -204,12 +204,12 @@ class _DojoMapMarkerState extends State<DojoMapMarker>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.65),
+                  color: Colors.black.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: widget.isSelected
                         ? _markerColor
-                        : _markerColor.withOpacity(0.4),
+                        : _markerColor.withValues(alpha: 0.4),
                     width: widget.isSelected ? 1.5 : 1,
                   ),
                 ),

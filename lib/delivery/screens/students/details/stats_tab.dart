@@ -102,10 +102,10 @@ class StatsTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.redAction.withOpacity(0.1),
+                color: AppColors.redAction.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: AppColors.redAction.withOpacity(0.4)),
+                    color: AppColors.redAction.withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [

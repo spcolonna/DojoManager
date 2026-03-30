@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:grand_dojo/core/l10n/generated/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../auth/login_screen.dart';
@@ -76,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF8A6D2F).withOpacity(0.15),
+                    const Color(0xFF8A6D2F).withValues(alpha: 0.15),
                     Colors.transparent,
                   ],
                 ),

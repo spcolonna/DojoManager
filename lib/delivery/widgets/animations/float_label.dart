@@ -92,9 +92,9 @@ class _FloatLabelWidgetState extends State<_FloatLabelWidget>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: widget.color.withOpacity(0.15),
+                color: widget.color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: widget.color.withOpacity(0.5)),
+                border: Border.all(color: widget.color.withValues(alpha: 0.5)),
               ),
               child: Text(
                 widget.text,

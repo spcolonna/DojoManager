@@ -64,7 +64,7 @@ class ProgressTab extends StatelessWidget {
                             height: isCurr ? 36 : 28,
                             decoration: BoxDecoration(
                               color: isDone || isCurr
-                                  ? color.withOpacity(0.2)
+                                  ? color.withValues(alpha: 0.2)
                                   : AppColors.bgElevated,
                               shape: BoxShape.circle,
                               border: Border.all(
@@ -83,7 +83,7 @@ class ProgressTab extends StatelessWidget {
                             Container(
                               width: 16, height: 2,
                               color: isDone
-                                  ? color.withOpacity(0.4)
+                                  ? color.withValues(alpha: 0.4)
                                   : AppColors.bgDivider,
                             ),
                         ],
@@ -175,7 +175,7 @@ class ProgressTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.goldPrimary.withOpacity(0.1),
+                      color: AppColors.goldPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

@@ -101,7 +101,7 @@ class _StudentCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: student.isInjured
-                ? AppColors.redAction.withOpacity(0.5)
+                ? AppColors.redAction.withValues(alpha: 0.5)
                 : AppColors.bgDivider,
           ),
         ),
@@ -114,9 +114,9 @@ class _StudentCard extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: styleColor.withOpacity(0.12),
+                    color: styleColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: styleColor.withOpacity(0.35)),
+                    border: Border.all(color: styleColor.withValues(alpha: 0.35)),
                   ),
                   child: Icon(AppIcons.student,
                       color: styleColor, size: 30),
@@ -186,10 +186,10 @@ class _StudentCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.goldPrimary.withOpacity(0.15),
+                      color: AppColors.goldPrimary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                          color: AppColors.goldPrimary.withOpacity(0.4)),
+                          color: AppColors.goldPrimary.withValues(alpha: 0.4)),
                     ),
                     child: Text(
                       '+${student.skillPoints} PH',
@@ -276,7 +276,7 @@ class _StudentCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.redAction.withOpacity(0.15),
+                      color: AppColors.redAction.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -336,9 +336,9 @@ class _TierBadge extends StatelessWidget {
     return Container(
       width: 18, height: 18,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         shape: BoxShape.circle,
-        border: Border.all(color: color.withOpacity(0.6), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.6), width: 1),
       ),
       child: Center(
         child: Text(

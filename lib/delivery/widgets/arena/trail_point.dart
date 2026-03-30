@@ -36,7 +36,7 @@ class TrailPainter extends CustomPainter {
         Offset(p.x * size.width, p.y * size.height),
         radius,
         Paint()
-          ..color = color.withOpacity(p.opacity * (i / trail.length))
+          ..color = color.withValues(alpha: p.opacity * (i / trail.length))
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
       );
     }

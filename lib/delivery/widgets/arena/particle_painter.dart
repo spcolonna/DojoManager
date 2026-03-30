@@ -29,7 +29,7 @@ class ParticlePainter extends CustomPainter {
     for (final p in particles) {
       final opacity = p.life.clamp(0.0, 1.0);
       final paint   = Paint()
-        ..color = p.color.withOpacity(opacity);
+        ..color = p.color.withValues(alpha: opacity);
 
       if (p.type == ParticleType.ring) {
         // Anillo expansivo

@@ -5,6 +5,7 @@ import 'package:grand_dojo/core/constants/app_colors.dart';
 import 'package:grand_dojo/core/utils/l10n_helper.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../core/providers/navigation_provider.dart';
 import '../settings/settings_screen.dart';
 import '../training/training_screen.dart';
 import '../tournament/tournament_screen.dart';
@@ -29,10 +30,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   static const int _md             = 150;
   static const int _gm             = 0;
   static const int _unreadMessages = 1;
-
+  
   @override
   Widget build(BuildContext context) {
     final loc = l10n(context);
+
+    ref.listen<int>(navigationProvider, (_, index) {
+      setState(() => _selectedIndex = index);
+    });
 
     final screens = [
       const DojoHome(),
@@ -166,7 +171,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -193,7 +198,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.goldPrimary.withOpacity(0.15)
+                                ? AppColors.goldPrimary.withValues(alpha: 0.15)
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(10),
                           ),

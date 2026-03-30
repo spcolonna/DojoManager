@@ -1,5 +1,5 @@
 import '../../core/config/tournament_config.dart';
-import '../../core/config/training_activities_config.dart';
+import '../day_plan.dart';
 
 /// Plan semanal del dojo.
 /// Cada día tiene una lista de actividades que entrenan TODOS los estudiantes.
@@ -69,70 +69,35 @@ class WeeklyPlan {
       },
     );
   }
-}
 
-class DayPlan {
-  final DayOfWeek day;
-  final DayType type;
-  final List<String> activityIds; // mismas actividades para TODOS los estudiantes
-  final bool isSimulated;
+  Map<String, dynamic> toMap() => {
+    'season': season,
+    'week': week,
+    'days': days.map((k, v) => MapEntry(k.index.toString(), v.toMap())),
+  };
 
-  const DayPlan({
-    required this.day,
-    required this.type,
-    this.activityIds = const [],
-    this.isSimulated = false,
-  });
-
-  factory DayPlan.empty(DayOfWeek day) =>
-      DayPlan(day: day, type: DayType.training);
-
-  factory DayPlan.rest(DayOfWeek day) =>
-      DayPlan(day: day, type: DayType.rest);
-
-  factory DayPlan.tournament(DayOfWeek day) =>
-      DayPlan(day: day, type: DayType.tournament);
-
-  bool get hasActivities => activityIds.isNotEmpty;
-
-  DayPlan copyWith({
-    List<String>? activityIds,
-    DayType? type,
-    bool? isSimulated,
-  }) => DayPlan(
-    day: day,
-    type: type ?? this.type,
-    activityIds: activityIds ?? this.activityIds,
-    isSimulated: isSimulated ?? this.isSimulated,
-  );
-
-  // Calcular fatiga total del día
-  int get totalFatigue {
-    if (type != DayType.training) return 0;
-    return activityIds.fold(0, (sum, id) {
-      final act = TrainingActivitiesConfig.byId(id);
-      return sum + (act?.fatigueAdd ?? 0);
-    });
-  }
-
-  // PH total del día
-  int get totalPH {
-    if (type != DayType.training) return 0;
-    return activityIds.fold(0, (sum, id) {
-      final act = TrainingActivitiesConfig.byId(id);
-      return sum + (act?.totalPH ?? 0);
-    });
-  }
-
-  // XP total del día
-  int get totalXP {
-    if (type != DayType.training) return 0;
-    return activityIds.fold(
-      TrainingActivitiesConfig.baseXPPerActivity,
-          (sum, id) {
-        final act = TrainingActivitiesConfig.byId(id);
-        return sum + (act?.xpBonus ?? 0);
-      },
+  factory WeeklyPlan.fromMap(Map<String, dynamic> map) {
+    final daysMap = map['days'] as Map<String, dynamic>? ?? {};
+    final days = <DayOfWeek, DayPlan>{};
+    for (final entry in daysMap.entries) {
+      final dayIndex = int.tryParse(entry.key);
+      if (dayIndex != null && dayIndex < DayOfWeek.values.length) {
+        final day = DayOfWeek.values[dayIndex];
+        days[day] = DayPlan.fromMap(entry.value as Map<String, dynamic>);
+      }
+    }
+    // Completar días faltantes con defaults
+    for (final day in DayOfWeek.values) {
+      days.putIfAbsent(day, () => day == DayOfWeek.saturday
+          ? DayPlan.tournament(day)
+          : day == DayOfWeek.sunday
+          ? DayPlan.rest(day)
+          : DayPlan.empty(day));
+    }
+    return WeeklyPlan(
+      season: map['season'] ?? 1,
+      week: map['week'] ?? 1,
+      days: days,
     );
   }
 }

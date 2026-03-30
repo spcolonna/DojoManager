@@ -1,10 +1,9 @@
-import 'dart:math';
+import '../../day_plan.dart';
 import '../../entities/student.dart';
 import '../../entities/training_session.dart';
 import '../../entities/weekly_plan.dart';
 import '../../value_objects/belt.dart';
 import '../../../core/config/training_activities_config.dart';
-import '../../../core/config/xp_config.dart';
 import '../../../infrastructure/repositories/firebase_dojo_repository.dart';
 
 class DaySimulationResult {
@@ -48,8 +47,7 @@ class StudentDayResult {
 
 class SimulateDayUseCase {
   final FirebaseDojoRepository _repo;
-  final Random _rng = Random();
-
+  
   SimulateDayUseCase(this._repo);
 
   Future<DaySimulationResult> execute({
@@ -136,7 +134,7 @@ class SimulateDayUseCase {
         studentName: student.nameKey,
         phGained: ph,
         xpGained: xp,
-        newFatigue: newFatigue as int,
+        newFatigue: newFatigue,
         statGains: statGains,
         leveledUp: leveledUp,
         newBelt: leveledUp ? belt : null,

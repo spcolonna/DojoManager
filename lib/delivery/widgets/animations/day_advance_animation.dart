@@ -75,7 +75,7 @@ class _DayAdvanceWidgetState extends State<_DayAdvanceWidget>
     return AnimatedBuilder(
       animation: _c,
       builder: (_, __) => Material(
-        color: Colors.black.withOpacity(_fadeIn.value * 0.85),
+        color: Colors.black.withValues(alpha: _fadeIn.value * 0.85),
         child: Center(
           child: Opacity(
             opacity: _fadeIn.value * _fadeOut.value,
@@ -89,7 +89,7 @@ class _DayAdvanceWidgetState extends State<_DayAdvanceWidget>
                     height: 1.5,
                     width: MediaQuery.of(context).size.width * 0.7 *
                         _fadeIn.value,
-                    color: AppColors.goldPrimary.withOpacity(0.5),
+                    color: AppColors.goldPrimary.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -115,7 +115,7 @@ class _DayAdvanceWidgetState extends State<_DayAdvanceWidget>
                     height: 1.5,
                     width: MediaQuery.of(context).size.width * 0.7 *
                         _fadeIn.value,
-                    color: AppColors.goldPrimary.withOpacity(0.5),
+                    color: AppColors.goldPrimary.withValues(alpha: 0.5),
                   ),
                 ],
               ),

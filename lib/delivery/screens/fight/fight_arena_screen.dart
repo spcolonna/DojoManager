@@ -837,7 +837,7 @@ class _FightArenaScreenState extends State<FightArenaScreen>
                         horizontal: 11, vertical: 6),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? sColor.withOpacity(0.18)
+                          ? sColor.withValues(alpha: 0.18)
                           : const Color(0xFF1A1A1A),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(

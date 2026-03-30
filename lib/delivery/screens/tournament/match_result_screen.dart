@@ -93,7 +93,7 @@ class _MatchResultScreenState extends State<MatchResultScreen>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    resultColor.withOpacity(0.2),
+                    resultColor.withValues(alpha: 0.2),
                     AppColors.bgDeep,
                   ],
                 ),
@@ -105,10 +105,10 @@ class _MatchResultScreenState extends State<MatchResultScreen>
                     Container(
                       width: 80, height: 80,
                       decoration: BoxDecoration(
-                        color: resultColor.withOpacity(0.15),
+                        color: resultColor.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: resultColor.withOpacity(0.5), width: 2),
+                            color: resultColor.withValues(alpha: 0.5), width: 2),
                       ),
                       child: Icon(
                         isDraw
@@ -178,14 +178,14 @@ class _MatchResultScreenState extends State<MatchResultScreen>
                           color: AppColors.bgSurface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: color.withOpacity(0.3)),
+                              color: color.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           children: [
                             Container(
                               width: 36, height: 36,
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.1),
+                                color: color.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(

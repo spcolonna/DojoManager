@@ -71,7 +71,7 @@ class SkillUnlockEffectState extends State<SkillUnlockEffect>
         angle: _rng.nextDouble() * 2 * pi,
         speed: 40 + _rng.nextDouble() * 60,
         size: 3 + _rng.nextDouble() * 4,
-        color: widget.color.withOpacity(0.8 + _rng.nextDouble() * 0.2),
+        color: widget.color.withValues(alpha: 0.8 + _rng.nextDouble() * 0.2),
       ));
     }
     _flashController.forward(from: 0);
@@ -95,7 +95,7 @@ class SkillUnlockEffectState extends State<SkillUnlockEffect>
                   boxShadow: [
                     if (_flashAnim.value > 0)
                       BoxShadow(
-                        color: widget.color.withOpacity(_flashAnim.value * 0.8),
+                        color: widget.color.withValues(alpha: _flashAnim.value * 0.8),
                         blurRadius: 20 * _flashAnim.value,
                         spreadRadius: 4 * _flashAnim.value,
                       ),
@@ -111,7 +111,7 @@ class SkillUnlockEffectState extends State<SkillUnlockEffect>
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: Colors.white.withOpacity(_flashAnim.value * 0.6),
+                      color: Colors.white.withValues(alpha: _flashAnim.value * 0.6),
                     ),
                   ),
                 ),

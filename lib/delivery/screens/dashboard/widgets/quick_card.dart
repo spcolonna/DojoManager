@@ -29,7 +29,7 @@ class QuickCard extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: gradient,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor.withOpacity(0.5)),
+          border: Border.all(color: borderColor.withValues(alpha: 0.5)),
         ),
         child: Row(
           children: [

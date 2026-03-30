@@ -33,7 +33,7 @@ class HistoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: session.leveledUp
-              ? AppColors.goldPrimary.withOpacity(0.4)
+              ? AppColors.goldPrimary.withValues(alpha: 0.4)
               : AppColors.bgDivider,
           width: session.leveledUp ? 1.5 : 1,
         ),
@@ -61,10 +61,10 @@ class HistoryCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.goldPrimary.withOpacity(0.15),
+                    color: AppColors.goldPrimary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: AppColors.goldPrimary.withOpacity(0.4)),
+                        color: AppColors.goldPrimary.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

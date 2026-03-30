@@ -67,12 +67,12 @@ class _DojoInfoCardState extends State<DojoInfoCard>
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.85),
+          color: Colors.black.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: styleColor.withOpacity(0.6), width: 1.5),
+          border: Border.all(color: styleColor.withValues(alpha: 0.6), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: styleColor.withOpacity(0.2),
+              color: styleColor.withValues(alpha: 0.2),
               blurRadius: 20,
               spreadRadius: 2,
             ),
@@ -88,9 +88,9 @@ class _DojoInfoCardState extends State<DojoInfoCard>
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: styleColor.withOpacity(0.15),
+                    color: styleColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: styleColor.withOpacity(0.4)),
+                    border: Border.all(color: styleColor.withValues(alpha: 0.4)),
                   ),
                   child: Icon(Icons.home_work_rounded,
                       color: styleColor, size: 26),
@@ -240,9 +240,9 @@ class _StatPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.25)),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
         ),
         child: Column(
           children: [

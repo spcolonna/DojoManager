@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../../../core/utils/l10n_helper.dart';
 import 'auth_view_model.dart';
-import '../dashboard/dashboard_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -192,10 +191,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7B241C).withOpacity(0.4),
+                          color: const Color(0xFF7B241C).withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: const Color(0xFFC0392B).withOpacity(0.6),
+                            color: const Color(0xFFC0392B).withValues(alpha: 0.6),
                           ),
                         ),
                         child: Row(
@@ -231,7 +230,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           elevation: 4,
-                          shadowColor: const Color(0xFFC9A84C).withOpacity(0.4),
+                          shadowColor: const Color(0xFFC9A84C).withValues(alpha: 0.4),
                         ),
                         child: state.isLoading
                             ? const SizedBox(

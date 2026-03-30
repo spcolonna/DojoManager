@@ -65,7 +65,7 @@ class SettingsScreen extends ConsumerWidget {
           const _Divider(),
 
           // ── SOUND ────────────────────────────────────────────────────
-          _SectionHeader(label: 'Audio'),
+          const _SectionHeader(label: 'Audio'),
           _SwitchTile(
             label: loc.settingsSound,
             icon: PhosphorIconsRegular.speakerHigh,
@@ -88,9 +88,9 @@ class SettingsScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.redAction.withOpacity(0.05),
+              color: AppColors.redAction.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.redAction.withOpacity(0.3)),
+              border: Border.all(color: AppColors.redAction.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +128,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
-                          color: AppColors.redAction.withOpacity(0.5)),
+                          color: AppColors.redAction.withValues(alpha: 0.5)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
@@ -408,7 +408,7 @@ class _SwitchTile extends StatelessWidget {
     return SwitchListTile(
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFFC9A84C),
+      activeThumbColor: const Color(0xFFC9A84C),
       secondary: Icon(icon, color: const Color(0xFF9099B0), size: 20),
       title: Text(
         label,

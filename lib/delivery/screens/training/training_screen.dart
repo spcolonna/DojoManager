@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:grand_dojo/delivery/screens/training/training_view_model.dart';
 import '../../../core/animations/app_animations.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../core/providers/navigation_provider.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/config/training_activities_config.dart';
 import '../../../core/providers/dojo_provider.dart';
+import '../../../domain/day_plan.dart';
 import '../../../domain/entities/weekly_plan.dart';
 import '../../../domain/use_cases/training/simulate_day_use_case.dart';
-import '../../../infrastructure/repositories/firebase_dojo_repository.dart';
 import '../../widgets/animations/day_advance_animation.dart';
 import '../../widgets/animations/float_label.dart';
 
@@ -25,9 +27,8 @@ class TrainingState {
   DayOfWeek? get currentDay {
     for (final day in DayOfWeek.values) {
       final p = plan.days[day];
-      if (p != null && !p.isSimulated && p.type != DayType.tournament) {
-        return day;
-      }
+      if (p == null || p.isSimulated) continue;
+      if (p.type != DayType.rest) return day;
     }
     return null;
   }
@@ -67,118 +68,6 @@ class TrainingState {
     return null;
   }
 }
-
-class TrainingViewModel extends StateNotifier<TrainingState> {
-  final Ref _ref;
-  late final SimulateDayUseCase _useCase;
-
-  TrainingViewModel(this._ref) : super(TrainingState(
-    plan: WeeklyPlan.defaultPlan(season: 1, week: 1),
-  )) {
-    _useCase = SimulateDayUseCase(FirebaseDojoRepository());
-  }
-
-  void selectDay(DayOfWeek day) {
-    state = state.copyWith(selectedDay: day);
-  }
-
-  void setDayActivities(DayOfWeek day, List<String> activityIds) {
-    final updated = state.plan.copyWithDay(
-      day,
-      state.plan.days[day]!.copyWith(activityIds: activityIds),
-    );
-    state = state.copyWith(plan: updated, clearSelected: true);
-  }
-
-  void setDayType(DayOfWeek day, DayType type) {
-    final updated = state.plan.copyWithDay(
-      day,
-      state.plan.days[day]!.copyWith(type: type),
-    );
-    state = state.copyWith(plan: updated);
-  }
-
-  Future<DaySimulationResult?> simulateDay(DayOfWeek day) async {
-    final students = await _ref.read(studentsProvider.future);
-    final plan = state.plan.days[day]!;
-
-    if (plan.type == DayType.tournament) return null;
-
-    final result = await _useCase.execute(students: students, plan: plan);
-
-    // Marcar el día como simulado
-    final updatedPlan = state.plan.copyWithDay(
-      day,
-      plan.copyWith(isSimulated: true),
-    );
-
-    _ref.invalidate(studentsProvider);
-
-    state = state.copyWith(
-      plan: updatedPlan,
-      completedDays: [...state.completedDays, result],
-    );
-
-    return result;
-  }
-
-  Future<void> simulateWeek(BuildContext context) async {
-    state = state.copyWith(isSimulating: true);
-
-    for (final day in DayOfWeek.values) {
-      final plan = state.plan.days[day];
-      if (plan == null || plan.isSimulated) continue;
-
-      // Si es torneo — parar y avisar
-      if (plan.type == DayType.tournament) {
-        state = state.copyWith(isSimulating: false);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n(context).trainingStopped,
-                style: GoogleFonts.rajdhani(color: AppColors.textPrimary)),
-            backgroundColor: AppColors.redDark,
-            behavior: SnackBarBehavior.floating,
-          ));
-        }
-        return;
-      }
-
-      // Animación de transición de día
-      if (context.mounted) {
-        await DayAdvanceAnimation.show(
-          context,
-          dayName: _dayName(day, context),
-          onDone: () {},
-        );
-      }
-
-      await simulateDay(day);
-
-      // Pequeña pausa entre días para que se sienta progresivo
-      await Future.delayed(const Duration(milliseconds: 300));
-    }
-
-    state = state.copyWith(isSimulating: false);
-  }
-
-  String _dayName(DayOfWeek day, BuildContext ctx) {
-    final loc = l10n(ctx);
-    return switch (day) {
-      DayOfWeek.monday    => loc.dayMonday,
-      DayOfWeek.tuesday   => loc.dayTuesday,
-      DayOfWeek.wednesday => loc.dayWednesday,
-      DayOfWeek.thursday  => loc.dayThursday,
-      DayOfWeek.friday    => loc.dayFriday,
-      DayOfWeek.saturday  => loc.daySaturday,
-      DayOfWeek.sunday    => loc.daySunday,
-    };
-  }
-}
-
-final trainingViewModelProvider =
-StateNotifierProvider<TrainingViewModel, TrainingState>((ref) {
-  return TrainingViewModel(ref);
-});
 
 // ─── SCREEN ───────────────────────────────────────────────────────────────────
 
@@ -247,9 +136,15 @@ class TrainingScreen extends ConsumerWidget {
               // Animación del día
               await DayAdvanceAnimation.show(
                 context,
-                dayName: ref
-                    .read(trainingViewModelProvider.notifier)
-                    ._dayName(day, context),
+                dayName: switch (day) {
+                  DayOfWeek.monday    => loc.dayMonday,
+                  DayOfWeek.tuesday   => loc.dayTuesday,
+                  DayOfWeek.wednesday => loc.dayWednesday,
+                  DayOfWeek.thursday  => loc.dayThursday,
+                  DayOfWeek.friday    => loc.dayFriday,
+                  DayOfWeek.saturday  => loc.daySaturday,
+                  DayOfWeek.sunday    => loc.daySunday,
+                },
                 onDone: () {},
               );
               final result = await ref
@@ -267,6 +162,9 @@ class TrainingScreen extends ConsumerWidget {
             onSimulateWeek: () => ref
                 .read(trainingViewModelProvider.notifier)
                 .simulateWeek(context),
+            onGoToTournament: () {
+              ref.read(navigationProvider.notifier).state = 2;
+            },
           ),
         ],
       ),
@@ -330,7 +228,7 @@ class _WeekCalendar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? color.withOpacity(0.15)
+                      ? color.withValues(alpha: 0.15)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
@@ -363,7 +261,7 @@ class _WeekCalendar extends StatelessWidget {
                                 ? AppColors.success
                                 : isCurrentDay
                                 ? AppColors.goldPrimary
-                                : color.withOpacity(
+                                : color.withValues(alpha: 
                                 dayPlan.hasActivities ? 1.0 : 0.3),
                             shape: BoxShape.circle,
                           ),
@@ -559,10 +457,10 @@ class _TrainingDayView extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.15),
+                    color: AppColors.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: AppColors.success.withOpacity(0.4)),
+                        color: AppColors.success.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -589,10 +487,10 @@ class _TrainingDayView extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.goldPrimary.withOpacity(0.12),
+                      color: AppColors.goldPrimary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                          color: AppColors.goldPrimary.withOpacity(0.4)),
+                          color: AppColors.goldPrimary.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -672,9 +570,9 @@ class _TrainingDayView extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
+                    color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: color.withOpacity(0.4)),
+                    border: Border.all(color: color.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -772,7 +670,7 @@ class _TrainingDayView extends ConsumerWidget {
                       Container(
                         width: 36, height: 36,
                         decoration: BoxDecoration(
-                          color: styleColor.withOpacity(0.12),
+                          color: styleColor.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(AppIcons.studentFill,
@@ -920,10 +818,10 @@ class _TournamentDayView extends StatelessWidget {
             Container(
               width: 72, height: 72,
               decoration: BoxDecoration(
-                color: AppColors.redAction.withOpacity(0.15),
+                color: AppColors.redAction.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: AppColors.redAction.withOpacity(0.4), width: 2),
+                    color: AppColors.redAction.withValues(alpha: 0.4), width: 2),
               ),
               child: const Icon(AppIcons.fightWin,
                   color: AppColors.redLight, size: 36),
@@ -968,10 +866,10 @@ class _RestDayView extends StatelessWidget {
             Container(
               width: 72, height: 72,
               decoration: BoxDecoration(
-                color: AppColors.info.withOpacity(0.15),
+                color: AppColors.info.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: AppColors.info.withOpacity(0.4), width: 2),
+                    color: AppColors.info.withValues(alpha: 0.4), width: 2),
               ),
               child: const Icon(Icons.hotel_rounded,
                   color: AppColors.infoLight, size: 36),
@@ -1023,11 +921,13 @@ class _SimulationBar extends StatelessWidget {
   final TrainingState state;
   final VoidCallback onSimulateDay;
   final VoidCallback onSimulateWeek;
+  final VoidCallback onGoToTournament;
 
   const _SimulationBar({
     required this.state,
     required this.onSimulateDay,
     required this.onSimulateWeek,
+    required this.onGoToTournament,
   });
 
   @override
@@ -1039,6 +939,13 @@ class _SimulationBar extends StatelessWidget {
     final canSimWeek = !state.isSimulating &&
         state.plan.days.values.any((d) => !d.isSimulated);
 
+    // Detectar si el día seleccionado O el día actual es torneo
+    final selectedIsTournament = state.selectedDay != null &&
+        state.plan.days[state.selectedDay!]?.type == DayType.tournament;
+    final currentIsTournament = state.currentDay != null &&
+        state.plan.days[state.currentDay!]?.type == DayType.tournament;
+    final showFightButton = selectedIsTournament || currentIsTournament;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
       decoration: const BoxDecoration(
@@ -1049,15 +956,33 @@ class _SimulationBar extends StatelessWidget {
         children: [
           // Simular día
           Expanded(
-            child: OutlinedButton(
-              onPressed: canSimDay && !state.isSimulating
-                  ? onSimulateDay
-                  : null,
+            child: showFightButton
+                ? ElevatedButton.icon(
+              onPressed: onGoToTournament,
+              icon: const Icon(Icons.emoji_events_rounded, size: 16),
+              label: Text(
+                'COMBATIR',
+                style: GoogleFonts.rajdhani(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.redAction,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            )
+                : OutlinedButton(
+              onPressed: canSimDay && !state.isSimulating ? onSimulateDay : null,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.goldPrimary,
                 side: BorderSide(
                   color: canSimDay
-                      ? AppColors.goldPrimary.withOpacity(0.5)
+                      ? AppColors.goldPrimary.withValues(alpha: 0.5)
                       : AppColors.bgDivider,
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 13),
@@ -1188,8 +1113,8 @@ class _ActivityPickerSheetState extends State<_ActivityPickerSheet> {
                     decoration: BoxDecoration(
                       color: _selected.length >=
                           TrainingActivitiesConfig.maxActivitiesPerWeek
-                          ? AppColors.redAction.withOpacity(0.15)
-                          : AppColors.goldPrimary.withOpacity(0.12),
+                          ? AppColors.redAction.withValues(alpha: 0.15)
+                          : AppColors.goldPrimary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -1248,16 +1173,16 @@ class _ActivityPickerSheetState extends State<_ActivityPickerSheet> {
                                   horizontal: 12, vertical: 7),
                               decoration: BoxDecoration(
                                 color: isSel
-                                    ? catColor.withOpacity(0.15)
+                                    ? catColor.withValues(alpha: 0.15)
                                     : atLim
-                                    ? AppColors.bgInput.withOpacity(0.3)
+                                    ? AppColors.bgInput.withValues(alpha: 0.3)
                                     : AppColors.bgElevated,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isSel
                                       ? catColor
                                       : atLim
-                                      ? AppColors.bgDivider.withOpacity(0.3)
+                                      ? AppColors.bgDivider.withValues(alpha: 0.3)
                                       : AppColors.bgDivider,
                                   width: isSel ? 1.5 : 1,
                                 ),

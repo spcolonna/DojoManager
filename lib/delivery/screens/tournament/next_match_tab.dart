@@ -12,6 +12,7 @@ import '../../../domain/entities/student.dart';
 import '../../../domain/entities/fight.dart';
 import '../../../domain/entities/tournament/tournament.dart';
 import '../fight/fight_arena_screen.dart';
+import '../training/training_view_model.dart';
 import 'match_result_screen.dart';
 
 class NextMatchTab extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class NextMatchTab extends ConsumerStatefulWidget {
 class _NextMatchTabState extends ConsumerState<NextMatchTab> {
   List<String> _enrolledIds = [];
   List<FightStrategy> _strategies = [];
-  bool _isSimulating = false;
+  final bool _isSimulating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -76,13 +77,13 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    rivalStyleColor.withOpacity(0.12),
+                    rivalStyleColor.withValues(alpha: 0.12),
                     AppColors.bgDeep,
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                    color: AppColors.redAction.withOpacity(0.5)),
+                    color: AppColors.redAction.withValues(alpha: 0.5)),
               ),
               child: Column(
                 children: [
@@ -105,11 +106,11 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                             Container(
                               width: 52, height: 52,
                               decoration: BoxDecoration(
-                                color: AppColors.goldPrimary.withOpacity(0.15),
+                                color: AppColors.goldPrimary.withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                     color: AppColors.goldPrimary
-                                        .withOpacity(0.5)),
+                                        .withValues(alpha: 0.5)),
                               ),
                               child: const Icon(Icons.home_work_rounded,
                                   color: AppColors.goldLight, size: 26),
@@ -146,8 +147,8 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                             Container(
                               width: 52, height: 52,
                               decoration: BoxDecoration(
-                                color: rivalStyleColor.withOpacity(0.15),
-                                border: Border.all(color: rivalStyleColor.withOpacity(0.5)),
+                                color: rivalStyleColor.withValues(alpha: 0.15),
+                                border: Border.all(color: rivalStyleColor.withValues(alpha: 0.5)),
                               ),
                               child: Icon(Icons.sports_mma_rounded,
                                   color: rivalStyleColor, size: 26),
@@ -270,6 +271,9 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
             playerFighters: enrolled,
             playerStrategies: _strategies,
           );
+
+          ref.read(trainingViewModelProvider.notifier).markTournamentDayComplete();
+          
           if (result != null && context.mounted) {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => MatchResultScreen(
@@ -311,7 +315,7 @@ class _RivalScout extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.manage_search_rounded,
+              const Icon(Icons.manage_search_rounded,
                   color: AppColors.textSecondary, size: 16),
               const SizedBox(width: 6),
               Text(
@@ -332,10 +336,10 @@ class _RivalScout extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: styleColor.withOpacity(0.12),
+                  color: styleColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border:
-                  Border.all(color: styleColor.withOpacity(0.4)),
+                  Border.all(color: styleColor.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   styleDisplayName(rival.styleId, loc),
@@ -419,7 +423,7 @@ class _AvgStatBar extends StatelessWidget {
                 minHeight: 5,
                 backgroundColor: AppColors.bgDivider,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                    color.withOpacity(0.7)),
+                    color.withValues(alpha: 0.7)),
               ),
             ),
           ),
@@ -558,14 +562,14 @@ class _EnrollmentSectionState extends State<_EnrollmentSection> {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? styleColor.withOpacity(0.08)
+                            ? styleColor.withValues(alpha: 0.08)
                             : AppColors.bgElevated,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
                               ? styleColor
                               : canSelect || !student.canFight
-                              ? AppColors.bgDivider.withOpacity(0.4)
+                              ? AppColors.bgDivider.withValues(alpha: 0.4)
                               : AppColors.bgDivider,
                           width: isSelected ? 1.5 : 1,
                         ),
@@ -597,7 +601,7 @@ class _EnrollmentSectionState extends State<_EnrollmentSection> {
                           Container(
                             width: 36, height: 36,
                             decoration: BoxDecoration(
-                              color: styleColor.withOpacity(0.12),
+                              color: styleColor.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(Icons.person_rounded,
@@ -743,7 +747,7 @@ class _StrategySelector extends StatelessWidget {
                   horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? sColor.withOpacity(0.15)
+                    ? sColor.withValues(alpha: 0.15)
                     : AppColors.bgElevated,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(

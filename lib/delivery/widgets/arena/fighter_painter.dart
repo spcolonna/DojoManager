@@ -31,7 +31,7 @@ class FighterPainter extends CustomPainter {
       r * (1.3 + pulse * 0.25),
       Paint()
         ..color = (isFlashing ? Colors.white : color)
-            .withOpacity(isFlashing ? 0.6 : 0.18)
+            .withValues(alpha: isFlashing ? 0.6 : 0.18)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
     );
 
@@ -44,7 +44,7 @@ class FighterPainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = Colors.white.withOpacity(0.3)
+        ..color = Colors.white.withValues(alpha: 0.3)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
@@ -52,7 +52,7 @@ class FighterPainter extends CustomPainter {
     // Punto central
     canvas.drawCircle(
       c, r * 0.20,
-      Paint()..color = Colors.white.withOpacity(0.9),
+      Paint()..color = Colors.white.withValues(alpha: 0.9),
     );
 
     // Etiqueta "TÚ" o "RIVAL"

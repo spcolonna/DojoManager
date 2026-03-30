@@ -97,8 +97,7 @@ class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
   @override
   Widget build(BuildContext context) {
     final loc           = l10n(context);
-    final styleColor    = AppColors.colorByStyle[_student.styleId] ?? AppColors.goldPrimary;
-    final branches      = SkillTreeConfig.branches;
+    const branches      = SkillTreeConfig.branches;
     final selectedBranch = branches.firstWhere((b) => b.id == _selectedBranch);
 
     return Scaffold(
@@ -134,10 +133,10 @@ class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.goldPrimary.withOpacity(0.15),
+                  color: AppColors.goldPrimary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: AppColors.goldPrimary.withOpacity(0.4)),
+                      color: AppColors.goldPrimary.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -183,7 +182,7 @@ class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
                         horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? color.withOpacity(0.15)
+                          ? color.withValues(alpha: 0.15)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
@@ -285,9 +284,9 @@ class _BranchTree extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.08),
+            color: color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.3)),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -337,7 +336,7 @@ class _BranchTree extends StatelessWidget {
                   width: 2,
                   height: 32,
                   color: prevUnlocked
-                      ? color.withOpacity(0.5)
+                      ? color.withValues(alpha: 0.5)
                       : AppColors.bgDivider,
                 ),
 
@@ -408,11 +407,11 @@ class _SkillNodeCard extends StatelessWidget {
 
     if (isUnlocked) {
       borderColor = color;
-      bgColor     = color.withOpacity(0.12);
+      bgColor     = color.withValues(alpha: 0.12);
       textColor   = color;
     } else if (canUnlock) {
-      borderColor = color.withOpacity(0.6);
-      bgColor     = color.withOpacity(0.05);
+      borderColor = color.withValues(alpha: 0.6);
+      bgColor     = color.withValues(alpha: 0.05);
       textColor   = AppColors.textPrimary;
     } else {
       borderColor = AppColors.bgDivider;
@@ -432,7 +431,7 @@ class _SkillNodeCard extends StatelessWidget {
           border: Border.all(color: borderColor, width: isUnlocked ? 2 : 1),
           boxShadow: isUnlocked
               ? [BoxShadow(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             blurRadius: 12,
             offset: const Offset(0, 2),
           )]
@@ -446,7 +445,7 @@ class _SkillNodeCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: isUnlocked ? color.withOpacity(0.2) : AppColors.bgInput,
+                color: isUnlocked ? color.withValues(alpha: 0.2) : AppColors.bgInput,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isUnlocked ? color : borderColor,
@@ -484,7 +483,7 @@ class _SkillNodeCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.goldPrimary.withOpacity(0.15),
+                            color: AppColors.goldPrimary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(

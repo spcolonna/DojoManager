@@ -262,7 +262,7 @@ class _StyleSelectionStepState
   @override
   Widget build(BuildContext context) {
     final loc    = l10n(context);
-    final styles = MartialStyle.all;
+    const styles = MartialStyle.all;
     final selectedId =
         ref.watch(_onboardingProvider).selectedStyleId ??
             styles[_currentPage].id;
@@ -329,7 +329,7 @@ class _StyleSelectionStepState
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: Color(style.colorHex).withOpacity(0.15),
+                              color: Color(style.colorHex).withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
                             child: Center(

@@ -7,9 +7,11 @@ import '../../../core/utils/belt_helper.dart';
 import '../../../core/config/tournament_config.dart';
 import '../../../core/providers/tournament_provider.dart';
 import '../../../core/providers/dojo_provider.dart';
+import '../../../domain/entities/fight_fighter.dart';
 import '../../../domain/entities/student.dart';
 import '../../../domain/entities/fight.dart';
 import '../../../domain/entities/tournament/tournament.dart';
+import '../fight/fight_arena_screen.dart';
 import 'match_result_screen.dart';
 
 class NextMatchTab extends ConsumerStatefulWidget {
@@ -227,30 +229,61 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
   }
 
   Future<void> _simulate(BuildContext context, List<Student> students) async {
-    setState(() => _isSimulating = true);
-
     final enrolled = students
         .where((s) => _enrolledIds.contains(s.id))
         .toList();
 
-    final result = await ref
-        .read(tournamentProvider.notifier)
-        .simulateNextMatch(
-      playerFighters: enrolled,
-      playerStrategies: _strategies,
-    );
+    if (enrolled.isEmpty) return;
 
-    setState(() => _isSimulating = false);
+    final tournament   = ref.read(tournamentProvider)!;
+    final playerTeamId = tournament.playerTeam?.id ?? '';
+    final nextMatch    = ref.read(tournamentProvider.notifier).nextPlayerMatch;
+    if (nextMatch == null) return;
 
-    if (result != null && context.mounted) {
-      final tournament = ref.read(tournamentProvider)!;
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => MatchResultScreen(
-          match: result,
-          tournament: tournament,
-        ),
-      ));
-    }
+    final isHome     = nextMatch.homeTeamId == playerTeamId;
+    final rivalTeamId = isHome ? nextMatch.awayTeamId : nextMatch.homeTeamId;
+    final rival      = ref.read(tournamentProvider.notifier).rivalFor(rivalTeamId);
+    if (rival == null || rival.fighters.isEmpty) return;
+
+    final blueFighter  = FightFighter.fromStudent(enrolled.first);
+    final redFighter   = FightFighter.fromAI(rival.fighters.first);
+    final rivalColor   = AppColors.colorByStyle[rival.styleId] ?? AppColors.redLight;
+
+    Navigator.of(context).push(PageRouteBuilder(
+      pageBuilder: (_, __, ___) => FightArenaScreen(
+        blueFighter: blueFighter,
+        redFighter: redFighter,
+        blueTeamId: playerTeamId,
+        redTeamId: rivalTeamId,
+        blueColor: AppColors.goldPrimary,
+        redColor: rivalColor,
+        blueName: enrolled.first.nameKey,
+        redName: rival.teamName,
+        initialStrategy: _strategies.isNotEmpty
+            ? _strategies.first
+            : FightStrategy.technical,
+        onComplete: (blueWins, redWins) async {
+          Navigator.of(context).pop();
+          final result = await ref
+              .read(tournamentProvider.notifier)
+              .simulateNextMatch(
+            playerFighters: enrolled,
+            playerStrategies: _strategies,
+          );
+          if (result != null && context.mounted) {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => MatchResultScreen(
+                match: result,
+                tournament: ref.read(tournamentProvider)!,
+              ),
+            ));
+          }
+        },
+      ),
+      transitionDuration: const Duration(milliseconds: 500),
+      transitionsBuilder: (_, anim, __, child) =>
+          FadeTransition(opacity: anim, child: child),
+    ));
   }
 }
 

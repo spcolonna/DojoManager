@@ -3,6 +3,7 @@ import '../../domain/entities/fight.dart';
 import '../../core/config/fight_config.dart';
 import '../../core/config/fight_strategy_config.dart';
 import '../../domain/entities/fight_fighter.dart';
+import '../../domain/entities/fight_tick_snapshot.dart';
 
 class FightSimulationService {
 
@@ -173,4 +174,147 @@ class FightSimulationService {
 
   double _rngRange(Random r) =>
       FightConfig.rngMin + r.nextDouble() * (FightConfig.rngMax - FightConfig.rngMin);
+
+
+  FightRoundSimulation simulateRoundToSnapshots({
+    required FightFighter blue,
+    required FightFighter red,
+    required FightStrategy blueStrategy,
+    required FightStrategy redStrategy,
+    required double blueStartStamina,
+    required double redStartStamina,
+    int? seed,
+  }) {
+    final rng = Random(seed ?? DateTime.now().millisecondsSinceEpoch);
+    double blueStamina = blueStartStamina;
+    double redStamina  = redStartStamina;
+    int bluePoints = 0, redPoints = 0;
+    final snapshots = <FightTickSnapshot>[];
+
+    final blueDef = FightStrategyConfig.strategies[blueStrategy.name];
+    final redDef  = FightStrategyConfig.strategies[redStrategy.name];
+
+    final stratVsStrat    = FightStrategyConfig.strategyMatchupModifiers[blueStrategy.name]?[redStrategy.name] ?? 1.0;
+    final stratVsStratRed = FightStrategyConfig.strategyMatchupModifiers[redStrategy.name]?[blueStrategy.name] ?? 1.0;
+    final blueVsRed = FightConfig.styleMatchupModifiers[blue.styleId]?[red.styleId] ?? 1.0;
+    final redVsBlue = FightConfig.styleMatchupModifiers[red.styleId]?[blue.styleId] ?? 1.0;
+
+    // Máquina de estados de movimiento
+    final cycle = [
+      ...List.filled(FightConfig.ticksCircling,    MovementState.circling),
+      ...List.filled(FightConfig.ticksApproaching, MovementState.approaching),
+      ...List.filled(FightConfig.ticksClinch,      MovementState.clinch),
+      ...List.filled(FightConfig.ticksRetreating,  MovementState.retreating),
+    ];
+
+    for (int tick = 1; tick <= FightConfig.ticksPerRound; tick++) {
+      final moveState = cycle[(tick - 1) % cycle.length];
+
+      // Stats efectivos con estrategia
+      final bEff = blueDef?.attackMultipliers.apply(blue.stats) ?? _defaultEffective(blue.stats);
+      final rEff = redDef?.attackMultipliers.apply(red.stats)   ?? _defaultEffective(red.stats);
+
+      // Fatiga
+      final bFat = _fatigue(blueStamina);
+      final rFat = _fatigue(redStamina);
+
+      // Ataque efectivo
+      final bAtk = _computeAttack(bEff, blueStamina, SliderValues.balanced) * bFat;
+      final rAtk = _computeAttack(rEff, redStamina,  SliderValues.balanced) * rFat;
+
+      // Defensa efectiva
+      final bDef_ = _computeDefense(bEff, blueStamina, SliderValues.balanced) * bFat;
+      final rDef_ = _computeDefense(rEff, redStamina,  SliderValues.balanced) * rFat;
+
+      String? eventType;
+      bool eventIsBlue = false;
+      bool blueBlocked = false;
+      bool redBlocked  = false;
+
+      // ── Solo hay scoring en CLINCH ────────────────────────────────────────
+      if (moveState == MovementState.clinch) {
+
+        // ── Intento de ataque azul ─────────────────────────────────────────
+        final bRoll = (bAtk / rDef_) * blueVsRed * stratVsStrat * _rngRange(rng);
+
+        // Intento de bloqueo del rojo
+        final redDefStat = (red.stats['def'] ?? 10) / 20.0;
+        final redBlockRoll = FightConfig.blockBaseProbability * redDefStat * _rngRange(rng);
+        final redBlocks = redBlockRoll > FightConfig.blockThreshold * 0.5 &&
+            blueStrategy != FightStrategy.grappling;
+
+        if (redBlocks && bRoll > FightConfig.cleanHitThreshold * 0.8) {
+          // Bloqueo exitoso del rojo
+          redBlocked = true;
+          eventType = null;
+        } else if (bRoll >= FightConfig.dominantHitThreshold) {
+          bluePoints += 2;
+          eventType = 'dominant_hit'; eventIsBlue = true;
+          if (blueDef?.hasTakedownMechanic == true &&
+              bRoll >= FightConfig.takedownThreshold) {
+            eventType = 'takedown'; eventIsBlue = true;
+            redStamina = (redStamina - FightConfig.takedownStaminaPenalty)
+                .clamp(0, 100);
+          }
+        } else if (bRoll >= FightConfig.cleanHitThreshold) {
+          bluePoints += 1;
+          eventType = 'clean_hit'; eventIsBlue = true;
+        }
+
+        // ── Intento de ataque rojo ─────────────────────────────────────────
+        final rRoll = (rAtk / bDef_) * redVsBlue * stratVsStratRed * _rngRange(rng);
+
+        final blueDefStat = (blue.stats['def'] ?? 10) / 20.0;
+        final blueBlockRoll = FightConfig.blockBaseProbability * blueDefStat * _rngRange(rng);
+        final blueBlocks = blueBlockRoll > FightConfig.blockThreshold * 0.5 &&
+            redStrategy != FightStrategy.grappling;
+
+        if (blueBlocks && rRoll > FightConfig.cleanHitThreshold * 0.8) {
+          blueBlocked = true;
+        } else if (rRoll >= FightConfig.dominantHitThreshold) {
+          redPoints += 2;
+          if (eventType == null) { eventType = 'dominant_hit'; eventIsBlue = false; }
+          if (redDef?.hasTakedownMechanic == true &&
+              rRoll >= FightConfig.takedownThreshold) {
+            eventType = 'takedown'; eventIsBlue = false;
+            blueStamina = (blueStamina - FightConfig.takedownStaminaPenalty)
+                .clamp(0, 100);
+          }
+        } else if (rRoll >= FightConfig.cleanHitThreshold) {
+          redPoints += 1;
+          if (eventType == null) { eventType = 'clean_hit'; eventIsBlue = false; }
+        }
+      }
+
+      // Stamina solo se gasta en approaching y clinch
+      if (moveState == MovementState.approaching ||
+          moveState == MovementState.clinch) {
+        blueStamina = (blueStamina - (blueDef?.staminaCostPerTick ?? 4.0))
+            .clamp(0, 100);
+        redStamina  = (redStamina  - (redDef?.staminaCostPerTick  ?? 4.0))
+            .clamp(0, 100);
+      }
+
+      snapshots.add(FightTickSnapshot(
+        tick: tick,
+        blueScore: bluePoints,
+        redScore: redPoints,
+        blueStamina: blueStamina,
+        redStamina: redStamina,
+        movementState: moveState,
+        eventType: eventType,
+        eventIsBlue: eventIsBlue,
+        blueBlocked: blueBlocked,
+        redBlocked: redBlocked,
+      ));
+    }
+
+    return FightRoundSimulation(
+      snapshots: snapshots,
+      bluePoints: bluePoints,
+      redPoints: redPoints,
+      blueStaminaAfter: blueStamina,
+      redStaminaAfter: redStamina,
+    );
+  }
 }

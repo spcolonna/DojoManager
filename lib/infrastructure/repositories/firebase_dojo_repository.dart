@@ -149,6 +149,65 @@ class FirebaseDojoRepository {
     }
   }
 
+  // ─── ECONOMÍA ─────────────────────────────────────────────────────────────
+
+  Future<void> addMD(String dojoId, int amount) async {
+    await _db.collection('dojos').doc(dojoId).update({
+      'md': FieldValue.increment(amount),
+    });
+  }
+
+  Future<void> spendMD(String dojoId, int amount) async {
+    await _db.collection('dojos').doc(dojoId).update({
+      'md': FieldValue.increment(-amount),
+    });
+  }
+
+  Future<void> addGems(String dojoId, int amount) async {
+    await _db.collection('dojos').doc(dojoId).update({
+      'gm': FieldValue.increment(amount),
+    });
+  }
+
+  Future<void> spendGems(String dojoId, int amount) async {
+    await _db.collection('dojos').doc(dojoId).update({
+      'gm': FieldValue.increment(-amount),
+    });
+  }
+
+  // ─── FICHAR ESTUDIANTE DESDE OFERTA ──────────────────────────────────────
+
+  Future<void> createStudentFromOffer({
+    required String dojoId,
+    required String name,
+    required String styleId,
+    required int beltLevel,
+    required StudentStats stats,
+  }) async {
+    final student = Student(
+      id: '',
+      dojoId: dojoId,
+      nameKey: name,
+      avatarAsset: '',
+      styleId: styleId,
+      belt: Belt(level: beltLevel),
+      currentXP: 0,
+      stats: stats,
+      tier: beltLevel >= 7
+          ? StudentTier.platinum
+          : beltLevel >= 5
+          ? StudentTier.gold
+          : StudentTier.silver,
+      skillPoints: beltLevel * 3,
+      unlockedNodeIds: [],
+      fatiguePercent: 0,
+      isInjured: false,
+      injuryWeeksRemaining: 0,
+    );
+
+    await createStudent(student);
+  }
+
   // ─── HELPER: crear los 2 estudiantes iniciales ────────────────────────────
 
   Future<void> createStartingStudents({

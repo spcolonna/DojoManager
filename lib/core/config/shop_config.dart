@@ -1,287 +1,340 @@
-/// Configuración completa de la tienda (Shop).
-/// Paquetes de GM, Pases de Maestro, paquetes especiales y ofertas de MD.
-/// Los storeId deben coincidir exactamente con los configurados en
-/// App Store Connect y Google Play Console.
-/// Para cambiar precios o agregar productos: solo tocar este archivo.
+/// Toda la configuración de la tienda en un solo lugar.
+/// Para agregar un producto nuevo: agregar una entrada aquí.
 class ShopConfig {
   ShopConfig._();
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAQUETES DE GEMAS DEL MAESTRO (GM)
-  // ──────────────────────────────────────────────────────────────────────────
+  // ─── FLAG DE SIMULACIÓN ───────────────────────────────────────────────────
+  /// true  → todas las compras se efectúan sin pasar por RevenueCat
+  /// false → flujo real de RevenueCat / App Store
+  static const bool simulationMode = true;
 
+  // ─── OFERTA DIARIA GRATUITA ───────────────────────────────────────────────
+  static const DailyOffer dailyOffer = DailyOffer(
+    rewardMD: 50,
+    rewardGems: 0,
+    rewardItemId: null,
+    refreshHours: 24,
+  );
+
+  // ─── PAQUETES DE GEMAS ────────────────────────────────────────────────────
   static const List<GemPackage> gemPackages = [
     GemPackage(
       id: 'gems_starter',
-      storeIdIos: 'grand_dojo_gems_80',
-      storeIdAndroid: 'grand_dojo_gems_80',
+      storeId: 'grand_dojo_gems_starter',
       gems: 80,
       priceUSD: 0.99,
-      labelKey: 'shop_gems_starter_label',
-      descKey: 'shop_gems_starter_desc',
-      isBestValue: false,
-      bonusPercent: 0,
+      tag: null,
     ),
     GemPackage(
       id: 'gems_advanced',
-      storeIdIos: 'grand_dojo_gems_500',
-      storeIdAndroid: 'grand_dojo_gems_500',
+      storeId: 'grand_dojo_gems_advanced',
       gems: 500,
       priceUSD: 4.99,
-      labelKey: 'shop_gems_advanced_label',
-      descKey: 'shop_gems_advanced_desc',
-      isBestValue: false,
-      bonusPercent: 0,
+      tag: null,
     ),
     GemPackage(
       id: 'gems_grand_master',
-      storeIdIos: 'grand_dojo_gems_1200',
-      storeIdAndroid: 'grand_dojo_gems_1200',
+      storeId: 'grand_dojo_gems_grand_master',
       gems: 1200,
+      bonusGems: 240,
       priceUSD: 9.99,
-      labelKey: 'shop_gems_grand_master_label',
-      descKey: 'shop_gems_grand_master_desc',
-      isBestValue: true,   // destacado en la UI
-      bonusPercent: 20,    // +20% bonus respecto al ratio base
+      tag: 'BEST VALUE',
     ),
     GemPackage(
       id: 'gems_legendary',
-      storeIdIos: 'grand_dojo_gems_3500',
-      storeIdAndroid: 'grand_dojo_gems_3500',
+      storeId: 'grand_dojo_gems_legendary',
       gems: 3500,
+      bonusGems: 1225,
       priceUSD: 19.99,
-      labelKey: 'shop_gems_legendary_label',
-      descKey: 'shop_gems_legendary_desc',
-      isBestValue: false,
-      bonusPercent: 35,    // +35% bonus
+      tag: '35% BONUS',
     ),
   ];
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PASES DE MAESTRO (SUSCRIPCIONES)
-  // ──────────────────────────────────────────────────────────────────────────
+  // ─── PAQUETES DE MD ───────────────────────────────────────────────────────
+  static const List<MDPackage> mdPackages = [
+    MDPackage(
+      id: 'md_small',
+      storeId: 'grand_dojo_md_small',
+      md: 500,
+      priceUSD: 0.99,
+    ),
+    MDPackage(
+      id: 'md_medium',
+      storeId: 'grand_dojo_md_medium',
+      md: 2000,
+      bonusMD: 200,
+      priceUSD: 2.99,
+    ),
+    MDPackage(
+      id: 'md_large',
+      storeId: 'grand_dojo_md_large',
+      md: 6000,
+      bonusMD: 1200,
+      priceUSD: 4.99,
+      tag: 'POPULAR',
+    ),
+  ];
 
+  // ─── COMBOS ───────────────────────────────────────────────────────────────
+  static const List<ComboPackage> combos = [
+    ComboPackage(
+      id: 'combo_starter',
+      storeId: 'grand_dojo_combo_starter',
+      titleKey: 'shopComboStarterTitle',
+      descKey: 'shopComboStarterDesc',
+      gems: 200,
+      md: 1000,
+      bonusItemId: 'item_xp_booster',
+      priceUSD: 3.99,
+      tag: 'NEW MASTER',
+      highlightColor: 0xFFD4780A,
+    ),
+    ComboPackage(
+      id: 'combo_champion',
+      storeId: 'grand_dojo_combo_champion',
+      titleKey: 'shopComboChampionTitle',
+      descKey: 'shopComboChampionDesc',
+      gems: 600,
+      md: 3000,
+      bonusItemId: 'item_scout_premium',
+      priceUSD: 8.99,
+      tag: 'CHAMPION',
+      highlightColor: 0xFFFFD700,
+    ),
+    ComboPackage(
+      id: 'combo_legend',
+      storeId: 'grand_dojo_combo_legend',
+      titleKey: 'shopComboLegendTitle',
+      descKey: 'shopComboLegendDesc',
+      gems: 1500,
+      md: 8000,
+      bonusItemId: 'item_master_session',
+      extraBonusItemId: 'item_injury_shield',
+      priceUSD: 17.99,
+      tag: '🔥 LEGEND',
+      highlightColor: 0xFF7B2D8B,
+    ),
+  ];
+
+  // ─── PASE DE MAESTRO ──────────────────────────────────────────────────────
   static const MasterPass monthlyPass = MasterPass(
     id: 'pass_monthly',
-    storeIdIos: 'grand_dojo_pass_monthly',
-    storeIdAndroid: 'grand_dojo_pass_monthly',
+    storeId: 'grand_dojo_pass_monthly',
     priceUSD: 4.99,
-    isAnnual: false,
-    labelKey: 'shop_pass_monthly_label',
-    descKey: 'shop_pass_monthly_desc',
-    benefitsKeys: [
-      'shop_pass_benefit_md_bonus',          // +30% MD en torneos
-      'shop_pass_benefit_extra_student_slot', // slot extra de estudiante
-      'shop_pass_benefit_weekly_scout',       // 1 scout premium/semana
-      'shop_pass_benefit_special_tournament', // 1 torneo especial/semana
-      'shop_pass_benefit_school_icon',        // ícono premium de escuela
-    ],
+    durationDays: 30,
+    bonusMDPercent: 30,
+    extraStudentSlot: true,
+    weeklyFreeScout: true,
+    exclusiveTournament: true,
+    weeklyGems: 0,
   );
 
   static const MasterPass annualPass = MasterPass(
     id: 'pass_annual',
-    storeIdIos: 'grand_dojo_pass_annual',
-    storeIdAndroid: 'grand_dojo_pass_annual',
+    storeId: 'grand_dojo_pass_annual',
     priceUSD: 34.99,
-    isAnnual: true,
-    labelKey: 'shop_pass_annual_label',
-    descKey: 'shop_pass_annual_desc',
-    savingsLabelKey: 'shop_pass_annual_savings', // "Ahorrás 25%"
-    benefitsKeys: [
-      'shop_pass_benefit_md_bonus',
-      'shop_pass_benefit_extra_student_slot',
-      'shop_pass_benefit_weekly_scout',
-      'shop_pass_benefit_special_tournament',
-      'shop_pass_benefit_school_icon',
-      'shop_pass_benefit_weekly_gems',        // +10 GM por semana (solo anual)
-      'shop_pass_benefit_exclusive_training', // planes exclusivos de entrenamiento
-      'shop_pass_benefit_invitation_tournament', // Torneos de Invitación fin de temporada
-    ],
+    durationDays: 365,
+    bonusMDPercent: 30,
+    extraStudentSlot: true,
+    weeklyFreeScout: true,
+    exclusiveTournament: true,
+    weeklyGems: 10,
+    savingsPercent: 41,
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAQUETES DE MD (MONEDAS DE DOJO)
-  // Para jugadores que quieren saltear el grindeo de moneda blanda
-  // ──────────────────────────────────────────────────────────────────────────
-
-  static const List<MDPackage> mdPackages = [
-    MDPackage(
-      id: 'md_small',
-      storeIdIos: 'grand_dojo_md_1000',
-      storeIdAndroid: 'grand_dojo_md_1000',
-      amount: 1000,
-      priceUSD: 0.99,
-      labelKey: 'shop_md_small_label',
+  // ─── ITEMS ESPECIALES ─────────────────────────────────────────────────────
+  static const List<SpecialItem> specialItems = [
+    SpecialItem(
+      id: 'item_recovery_potion',
+      titleKey: 'shopItemRecoveryTitle',
+      descKey: 'shopItemRecoveryDesc',
+      icon: 'heartbeat',
+      effectType: ItemEffectType.recoveryAll,
+      costGems: 5,
+      costMD: 0,
     ),
-    MDPackage(
-      id: 'md_medium',
-      storeIdIos: 'grand_dojo_md_5500',
-      storeIdAndroid: 'grand_dojo_md_5500',
-      amount: 5500,
-      priceUSD: 4.99,
-      labelKey: 'shop_md_medium_label',
-      bonusPercent: 10,
+    SpecialItem(
+      id: 'item_xp_booster',
+      titleKey: 'shopItemXPBoosterTitle',
+      descKey: 'shopItemXPBoosterDesc',
+      icon: 'star',
+      effectType: ItemEffectType.xpBoost,
+      effectValue: 50,
+      costGems: 8,
+      costMD: 0,
     ),
-    MDPackage(
-      id: 'md_large',
-      storeIdIos: 'grand_dojo_md_12000',
-      storeIdAndroid: 'grand_dojo_md_12000',
-      amount: 12000,
-      priceUSD: 9.99,
-      labelKey: 'shop_md_large_label',
-      bonusPercent: 20,
+    SpecialItem(
+      id: 'item_injury_shield',
+      titleKey: 'shopItemInjuryShieldTitle',
+      descKey: 'shopItemInjuryShieldDesc',
+      icon: 'shield',
+      effectType: ItemEffectType.injuryShield,
+      costGems: 6,
+      costMD: 0,
     ),
-  ];
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAQUETES ESPECIALES (tiempo limitado o bundles)
-  // Activar/desactivar desde aquí sin cambiar lógica de UI
-  // ──────────────────────────────────────────────────────────────────────────
-
-  static const List<SpecialBundle> specialBundles = [
-    SpecialBundle(
-      id: 'bundle_starter',
-      storeIdIos: 'grand_dojo_bundle_starter',
-      storeIdAndroid: 'grand_dojo_bundle_starter',
-      priceUSD: 2.99,
-      gemsIncluded: 200,
-      mdIncluded: 500,
-      labelKey: 'shop_bundle_starter_label',
-      descKey: 'shop_bundle_starter_desc',
-      isTimeLimited: false,
-      isActive: true,
+    SpecialItem(
+      id: 'item_master_session',
+      titleKey: 'shopItemMasterSessionTitle',
+      descKey: 'shopItemMasterSessionDesc',
+      icon: 'brain',
+      effectType: ItemEffectType.masterSession,
+      effectValue: 20,
+      costGems: 5,
+      costMD: 0,
     ),
-    SpecialBundle(
-      id: 'bundle_new_school',
-      storeIdIos: 'grand_dojo_bundle_new_school',
-      storeIdAndroid: 'grand_dojo_bundle_new_school',
-      priceUSD: 4.99,
-      gemsIncluded: 300,
-      mdIncluded: 1200,
-      unlocksSecondDojo: true,
-      labelKey: 'shop_bundle_new_school_label',
-      descKey: 'shop_bundle_new_school_desc',
-      isTimeLimited: false,
-      isActive: true,
+    SpecialItem(
+      id: 'item_scout_premium',
+      titleKey: 'shopItemScoutPremiumTitle',
+      descKey: 'shopItemScoutPremiumDesc',
+      icon: 'magnifying_glass',
+      effectType: ItemEffectType.premiumScout,
+      costGems: 3,
+      costMD: 0,
+    ),
+    SpecialItem(
+      id: 'item_md_scout',
+      titleKey: 'shopItemMDScoutTitle',
+      descKey: 'shopItemMDScoutDesc',
+      icon: 'magnifying_glass',
+      effectType: ItemEffectType.basicScout,
+      costGems: 0,
+      costMD: 100,
     ),
   ];
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // COSTOS DE ACCIONES IN-GAME PAGAS (usando GM)
-  // ──────────────────────────────────────────────────────────────────────────
+  // ─── ESTUDIANTES DESTACADOS (rotación 48hs) ───────────────────────────────
+  // Se generan proceduralmente con seed basado en la fecha
+  static int featuredStudentSeed() {
+    final now = DateTime.now();
+    // Cambia cada 48 horas
+    return now.year * 10000 + now.month * 100 + (now.day ~/ 2);
+  }
 
-  /// GM para acelerar entrenamiento (saltar tiempo de semana)
-  static const int gmToSkipTrainingWeek = 10;
+  static const int featuredStudentCount = 3;
+  static const int featuredStudentBeltMin = 4; // mínimo verde
+  static const int featuredStudentBeltMax = 7; // máximo marrón
 
-  /// GM para recuperar stamina de un estudiante inmediatamente
-  static const int gmToRestoreStamina = 2;
-
-  /// GM para curar una lesión instantáneamente
-  static const int gmToHealInjury = 5;
-
-  /// GM para añadir un slot temporal de torneo (pelear 3 estudiantes en lugar de 2)
-  static const int gmForExtraTournamentSlot = 8;
-
-  /// GM para ver las stats completas de un candidato en el mercado (sin scout)
-  static const int gmToRevealMarketStudent = 1;
+  static const List<FeaturedStudentPrice> featuredStudentPrices = [
+    FeaturedStudentPrice(beltLevel: 4, costMD: 800,   costGems: 0),
+    FeaturedStudentPrice(beltLevel: 5, costMD: 1500,  costGems: 0),
+    FeaturedStudentPrice(beltLevel: 6, costMD: 0,     costGems: 30),
+    FeaturedStudentPrice(beltLevel: 7, costMD: 0,     costGems: 60),
+  ];
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// DATA CLASSES
-// ──────────────────────────────────────────────────────────────────────────────
+// ─── DATA CLASSES ─────────────────────────────────────────────────────────────
+
+class DailyOffer {
+  final int rewardMD;
+  final int rewardGems;
+  final String? rewardItemId;
+  final int refreshHours;
+  const DailyOffer({
+    required this.rewardMD, required this.rewardGems,
+    required this.rewardItemId, required this.refreshHours,
+  });
+}
 
 class GemPackage {
   final String id;
-  final String storeIdIos;
-  final String storeIdAndroid;
+  final String storeId;
   final int gems;
+  final int bonusGems;
   final double priceUSD;
-  final String labelKey;
-  final String descKey;
-  final bool isBestValue;
-  final int bonusPercent;
-
+  final String? tag;
   const GemPackage({
-    required this.id,
-    required this.storeIdIos,
-    required this.storeIdAndroid,
-    required this.gems,
-    required this.priceUSD,
-    required this.labelKey,
-    required this.descKey,
-    required this.isBestValue,
-    required this.bonusPercent,
+    required this.id, required this.storeId, required this.gems,
+    this.bonusGems = 0, required this.priceUSD, this.tag,
+  });
+  int get totalGems => gems + bonusGems;
+}
+
+class MDPackage {
+  final String id;
+  final String storeId;
+  final int md;
+  final int bonusMD;
+  final double priceUSD;
+  final String? tag;
+  const MDPackage({
+    required this.id, required this.storeId, required this.md,
+    this.bonusMD = 0, required this.priceUSD, this.tag,
+  });
+  int get totalMD => md + bonusMD;
+}
+
+class ComboPackage {
+  final String id;
+  final String storeId;
+  final String titleKey;
+  final String descKey;
+  final int gems;
+  final int md;
+  final String? bonusItemId;
+  final String? extraBonusItemId;
+  final double priceUSD;
+  final String? tag;
+  final int highlightColor;
+  const ComboPackage({
+    required this.id, required this.storeId,
+    required this.titleKey, required this.descKey,
+    required this.gems, required this.md,
+    this.bonusItemId, this.extraBonusItemId,
+    required this.priceUSD, this.tag,
+    required this.highlightColor,
   });
 }
 
 class MasterPass {
   final String id;
-  final String storeIdIos;
-  final String storeIdAndroid;
+  final String storeId;
   final double priceUSD;
-  final bool isAnnual;
-  final String labelKey;
-  final String descKey;
-  final String? savingsLabelKey;
-  final List<String> benefitsKeys;
-
+  final int durationDays;
+  final int bonusMDPercent;
+  final bool extraStudentSlot;
+  final bool weeklyFreeScout;
+  final bool exclusiveTournament;
+  final int weeklyGems;
+  final int savingsPercent;
   const MasterPass({
-    required this.id,
-    required this.storeIdIos,
-    required this.storeIdAndroid,
-    required this.priceUSD,
-    required this.isAnnual,
-    required this.labelKey,
-    required this.descKey,
-    this.savingsLabelKey,
-    required this.benefitsKeys,
+    required this.id, required this.storeId,
+    required this.priceUSD, required this.durationDays,
+    required this.bonusMDPercent, required this.extraStudentSlot,
+    required this.weeklyFreeScout, required this.exclusiveTournament,
+    required this.weeklyGems, this.savingsPercent = 0,
   });
 }
 
-class MDPackage {
-  final String id;
-  final String storeIdIos;
-  final String storeIdAndroid;
-  final int amount;
-  final double priceUSD;
-  final String labelKey;
-  final int bonusPercent;
-
-  const MDPackage({
-    required this.id,
-    required this.storeIdIos,
-    required this.storeIdAndroid,
-    required this.amount,
-    required this.priceUSD,
-    required this.labelKey,
-    this.bonusPercent = 0,
-  });
+enum ItemEffectType {
+  recoveryAll,
+  xpBoost,
+  injuryShield,
+  masterSession,
+  premiumScout,
+  basicScout,
 }
 
-class SpecialBundle {
+class SpecialItem {
   final String id;
-  final String storeIdIos;
-  final String storeIdAndroid;
-  final double priceUSD;
-  final int gemsIncluded;
-  final int mdIncluded;
-  final bool unlocksSecondDojo;
-  final String labelKey;
+  final String titleKey;
   final String descKey;
-  final bool isTimeLimited;
-  final bool isActive;
+  final String icon;
+  final ItemEffectType effectType;
+  final int effectValue;
+  final int costGems;
+  final int costMD;
+  const SpecialItem({
+    required this.id, required this.titleKey, required this.descKey,
+    required this.icon, required this.effectType,
+    this.effectValue = 0, required this.costGems, required this.costMD,
+  });
+}
 
-  const SpecialBundle({
-    required this.id,
-    required this.storeIdIos,
-    required this.storeIdAndroid,
-    required this.priceUSD,
-    required this.gemsIncluded,
-    required this.mdIncluded,
-    this.unlocksSecondDojo = false,
-    required this.labelKey,
-    required this.descKey,
-    required this.isTimeLimited,
-    required this.isActive,
+class FeaturedStudentPrice {
+  final int beltLevel;
+  final int costMD;
+  final int costGems;
+  const FeaturedStudentPrice({
+    required this.beltLevel, required this.costMD, required this.costGems,
   });
 }

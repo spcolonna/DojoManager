@@ -5,7 +5,9 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/providers/tournament_provider.dart';
 import '../../widgets/no_tournament_view.dart';
+import '../training/training_view_model.dart';
 import 'next_match_tab.dart';
+import 'not_match_day_view.dart';
 import 'standings_tab.dart';
 import 'results_tab.dart';
 
@@ -34,8 +36,16 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
 
   @override
   Widget build(BuildContext context) {
-    final loc        = l10n(context);
-    final tournament = ref.watch(tournamentProvider);
+    final loc          = l10n(context);
+    final tournament   = ref.watch(tournamentProvider);
+    final trainingState = ref.watch(trainingViewModelProvider);
+
+    // Día actual del calendario
+    final currentDay   = trainingState.currentDay;
+    final tournamentDay = trainingState.plan.tournamentDay;
+    final isMatchDay   = currentDay != null &&
+        tournamentDay != null &&
+        currentDay == tournamentDay;
 
     return Scaffold(
       backgroundColor: AppColors.bgDeep,
@@ -60,7 +70,7 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
                 loc.tournamentRound(tournament.week),
                 style: GoogleFonts.rajdhani(
                   fontSize: 10,
-                  color: AppColors.textSecondary,  // más claro
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
                 ),
@@ -88,14 +98,9 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
               labelColor: Colors.white,
               unselectedLabelColor: AppColors.textTertiary,
               labelStyle: GoogleFonts.rajdhani(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-              ),
+                  fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0.5),
               unselectedLabelStyle: GoogleFonts.rajdhani(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+                  fontSize: 12, fontWeight: FontWeight.w500),
               tabs: [
                 Tab(text: loc.tournamentNextMatch),
                 Tab(text: loc.tournamentStandings),
@@ -110,7 +115,16 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
           : TabBarView(
         controller: _tabs,
         children: [
-          NextMatchTab(tournament: tournament),
+          // ← La única pestaña que cambia según el día
+          isMatchDay
+              ? NextMatchTab(tournament: tournament)
+              : tournamentDay == null
+              ? const NoTournamentView()
+              : NotMatchDayView(
+            tournament: tournament,
+            tournamentDay: tournamentDay, 
+            trainingState: trainingState,
+          ),
           StandingsTab(tournament: tournament),
           ResultsTab(tournament: tournament),
         ],

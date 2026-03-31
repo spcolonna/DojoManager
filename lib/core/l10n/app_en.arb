@@ -515,5 +515,13 @@
   "msgCupInviteTitle": "Cup Invitation",
   "msgCupInviteBody": "You qualified for the Inter-Style Cup. The international competition begins at week 8.",
   "msgDevTitle": "Message from the Masters",
-  "msgSystemTitle": "Kingdom Notice"
+  "msgSystemTitle": "Kingdom Notice",
+
+  "tournamentNextFight": "NEXT FIGHT",
+  "tournamentDaysLeft": "{days} days until the fight",
+  "@tournamentDaysLeft": { "placeholders": { "days": { "type": "int" } } },
+  "tournamentTomorrow": "Tomorrow is fight day",
+  "tournamentAdvanceWarning": "Advancing will run the training for the intermediate days.",
+  "tournamentAdvanceButton": "ADVANCE TO FIGHT DAY",
+  "tournamentAdvancing": "Training..."
 }

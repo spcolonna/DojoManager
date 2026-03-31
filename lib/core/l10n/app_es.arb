@@ -514,5 +514,13 @@
   "msgCupInviteTitle": "Invitación a la Copa",
   "msgCupInviteBody": "Clasificaste para la Copa Inter-Estilos. La competencia internacional comienza en la semana 8.",
   "msgDevTitle": "Mensaje de los Maestros",
-  "msgSystemTitle": "Aviso del Reino"
+  "msgSystemTitle": "Aviso del Reino",
+
+  "tournamentNextFight": "PRÓXIMO COMBATE",
+  "tournamentDaysLeft": "Faltan {days} días para el combate",
+  "@tournamentDaysLeft": { "placeholders": { "days": { "type": "int" } } },
+  "tournamentTomorrow": "Mañana es el combate",
+  "tournamentAdvanceWarning": "Al avanzar se ejecutará el entrenamiento de los días intermedios.",
+  "tournamentAdvanceButton": "AVANZAR HASTA EL COMBATE",
+  "tournamentAdvancing": "Entrenando..."
 }

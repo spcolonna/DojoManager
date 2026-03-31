@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/dojo.dart';
+import '../../domain/entities/message.dart';
 import '../../domain/entities/student.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/entities/weekly_plan.dart';
@@ -268,6 +269,42 @@ class FirebaseDojoRepository {
     );
 
     await createStudent(student);
+  }
+
+  // ─── MENSAJES ─────────────────────────────────────────────────────────────
+
+  Future<List<AppMessage>> getMessages(String userId) async {
+    try {
+      final query = await _db
+          .collection('users')
+          .doc(userId)
+          .collection('messages')
+          .orderBy('createdAt', descending: true)
+          .get();
+      return query.docs
+          .map((d) => AppMessage.fromMap({...d.data(), 'id': d.id}))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> addMessage(String userId, AppMessage message) async {
+    await _db
+        .collection('users')
+        .doc(userId)
+        .collection('messages')
+        .doc(message.id)
+        .set(message.toMap());
+  }
+
+  Future<void> markMessageRead(String userId, String messageId) async {
+    await _db
+        .collection('users')
+        .doc(userId)
+        .collection('messages')
+        .doc(messageId)
+        .update({'isRead': true});
   }
 
   // ─── HELPER: crear los 2 estudiantes iniciales ────────────────────────────

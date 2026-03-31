@@ -5,6 +5,7 @@ import 'package:grand_dojo/core/constants/app_colors.dart';
 import 'package:grand_dojo/core/utils/l10n_helper.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../core/providers/messages_provider.dart';
 import '../../../core/providers/navigation_provider.dart';
 import '../settings/settings_screen.dart';
 import '../training/training_screen.dart';
@@ -29,7 +30,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   static const int _season         = 1;
   static const int _md             = 150;
   static const int _gm             = 0;
-  static const int _unreadMessages = 1;
   
   @override
   Widget build(BuildContext context) {
@@ -38,6 +38,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ref.listen<int>(navigationProvider, (_, index) {
       setState(() => _selectedIndex = index);
     });
+
+    final unread = ref.watch(unreadMessagesProvider);
 
     final screens = [
       const DojoHome(),
@@ -126,13 +128,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           padding: const EdgeInsets.all(8),
                           constraints: const BoxConstraints(),
                         ),
-                        if (_unreadMessages > 0)
+                        if (unread > 0)
                           Positioned(
-                            top: 2,
-                            right: 2,
+                            top: 2, right: 2,
                             child: Container(
-                              width: 8,
-                              height: 8,
+                              width: 8, height: 8,
                               decoration: const BoxDecoration(
                                 color: AppColors.redLight,
                                 shape: BoxShape.circle,

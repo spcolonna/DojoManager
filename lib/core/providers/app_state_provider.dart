@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/entities/message.dart';
 import '../../infrastructure/repositories/firebase_dojo_repository.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/entities/dojo.dart';
@@ -51,6 +52,29 @@ class AppStateNotifier extends StateNotifier<AppState> {
     if (dojo == null) {
       state = AppState(route: AppRoute.onboarding, userProgress: progress);
       return;
+    }
+
+    if (dojo.currentWeek == 1 && !dojo.tournamentActive) {
+      final existing = await _repo.getMessages(userId);
+      final inviteId = 'league_invite_s${dojo.currentSeason}_${dojo.styleId}';
+      final alreadySent = existing.any((m) => m.id == inviteId);
+      if (!alreadySent) {
+        await _repo.addMessage(
+          userId,
+          AppMessage(
+            id: inviteId,
+            type: MessageType.tournamentInvite,
+            titleKey: 'msgLeagueInviteTitle',
+            bodyKey: 'msgLeagueInviteBody',
+            params: {
+              'style': dojo.styleId,
+              'season': dojo.currentSeason,
+            },
+            isRead: false,
+            createdAt: DateTime.now(),
+          ),
+        );
+      }
     }
 
     state = AppState(

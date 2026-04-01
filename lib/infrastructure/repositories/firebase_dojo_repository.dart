@@ -6,6 +6,7 @@ import '../../domain/entities/message.dart';
 import '../../domain/entities/student.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/entities/weekly_plan.dart';
+import '../../domain/use_cases/training/generate_learning_coefficients.dart';
 import '../../domain/value_objects/student_stats.dart';
 import '../../domain/value_objects/belt.dart';
 
@@ -247,8 +248,10 @@ class FirebaseDojoRepository {
     required int beltLevel,
     required StudentStats stats,
   }) async {
+    final coeffGen = GenerateLearningCoefficients();
+    final id = _uuid.v4();
     final student = Student(
-      id: '',
+      id: id,
       dojoId: dojoId,
       nameKey: name,
       avatarAsset: '',
@@ -266,6 +269,7 @@ class FirebaseDojoRepository {
       fatiguePercent: 0,
       isInjured: false,
       injuryWeeksRemaining: 0,
+      learningCoefficients: coeffGen.execute(id),
     );
 
     await createStudent(student);
@@ -320,8 +324,11 @@ class FirebaseDojoRepository {
       str: 8, spd: 11, tec: 12, def: 9, men: 10, res: 50,
     );
 
+    final coeffGen = GenerateLearningCoefficients();
+
+    final zhangId = _uuid.v4();
     final zhang = Student(
-      id: '',
+      id: zhangId,
       dojoId: dojoId,
       nameKey: 'Zhang Wei',
       avatarAsset: 'assets/images/students/student_zhang_wei_portrait.png',
@@ -335,10 +342,12 @@ class FirebaseDojoRepository {
       fatiguePercent: 0,
       isInjured: false,
       injuryWeeksRemaining: 0,
+      learningCoefficients: coeffGen.execute(zhangId),
     );
 
+    final keikoId = _uuid.v4();
     final keiko = Student(
-      id: '',
+      id: keikoId,
       dojoId: dojoId,
       nameKey: 'Keiko Mori',
       avatarAsset: 'assets/images/students/student_keiko_mori_portrait.png',
@@ -352,6 +361,7 @@ class FirebaseDojoRepository {
       fatiguePercent: 0,
       isInjured: false,
       injuryWeeksRemaining: 0,
+      learningCoefficients: coeffGen.execute(keikoId),
     );
 
     await createStudent(zhang);

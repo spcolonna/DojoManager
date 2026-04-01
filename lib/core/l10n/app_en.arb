@@ -523,5 +523,12 @@
   "tournamentTomorrow": "Tomorrow is fight day",
   "tournamentAdvanceWarning": "Advancing will run the training for the intermediate days.",
   "tournamentAdvanceButton": "ADVANCE TO FIGHT DAY",
-  "tournamentAdvancing": "Training..."
+  "tournamentAdvancing": "Training...",
+
+  "talentProdigy": "Prodigy",
+  "talentGifted": "Gifted",
+  "talentNormal": "Normal",
+  "talentHardWorker": "Hard Worker",
+  "talentLimited": "Limited",
+  "talentLocked": "Use a Premium Scout to reveal this student's potential"
 }

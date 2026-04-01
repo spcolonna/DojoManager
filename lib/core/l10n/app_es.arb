@@ -522,5 +522,12 @@
   "tournamentTomorrow": "Mañana es el combate",
   "tournamentAdvanceWarning": "Al avanzar se ejecutará el entrenamiento de los días intermedios.",
   "tournamentAdvanceButton": "AVANZAR HASTA EL COMBATE",
-  "tournamentAdvancing": "Entrenando..."
+  "tournamentAdvancing": "Entrenando...",
+
+  "talentProdigy": "Prodigio",
+  "talentGifted": "Talentoso",
+  "talentNormal": "Normal",
+  "talentHardWorker": "Con esfuerzo",
+  "talentLimited": "Limitado",
+  "talentLocked": "Usá un Scout Premium para revelar el potencial de este estudiante"
 }

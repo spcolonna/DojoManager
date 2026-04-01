@@ -21,6 +21,7 @@ class Student extends Equatable {
   final bool isInjured;
   final int injuryWeeksRemaining;
   final List<TrainingSession> trainingHistory;
+  final Map<String, double> learningCoefficients;
 
   const Student({
     required this.id,
@@ -38,6 +39,7 @@ class Student extends Equatable {
     required this.isInjured,
     required this.injuryWeeksRemaining,
     this.trainingHistory = const [],
+    this.learningCoefficients = const {},
   });
 
   bool get canFight => !isInjured && fatiguePercent < 100;
@@ -48,6 +50,7 @@ class Student extends Equatable {
     StudentTier? tier, int? skillPoints, List<String>? unlockedNodeIds,
     int? fatiguePercent, bool? isInjured, int? injuryWeeksRemaining,
     List<TrainingSession>? trainingHistory,
+    Map<String, double>? learningCoefficients,
   }) => Student(
     id: id ?? this.id,
     dojoId: dojoId ?? this.dojoId,
@@ -64,6 +67,7 @@ class Student extends Equatable {
     isInjured: isInjured ?? this.isInjured,
     injuryWeeksRemaining: injuryWeeksRemaining ?? this.injuryWeeksRemaining,
     trainingHistory: trainingHistory ?? this.trainingHistory,
+    learningCoefficients: learningCoefficients ?? this.learningCoefficients,
   );
 
   Map<String, dynamic> toMap() => {
@@ -79,6 +83,7 @@ class Student extends Equatable {
     'isInjured': isInjured,
     'injuryWeeksRemaining': injuryWeeksRemaining,
     'trainingHistory': trainingHistory.map((s) => s.toMap()).toList(),
+    'learningCoefficients': learningCoefficients,
   };
 
   factory Student.fromMap(Map<String, dynamic> map) => Student(
@@ -99,6 +104,11 @@ class Student extends Equatable {
     trainingHistory: (map['trainingHistory'] as List? ?? [])
         .map((s) => TrainingSession.fromMap(s))
         .toList(),
+    learningCoefficients: Map<String, double>.from(
+      (map['learningCoefficients'] as Map?)?.map(
+            (k, v) => MapEntry(k.toString(), (v as num).toDouble()),
+      ) ?? {},
+    ),
   );
 
   @override

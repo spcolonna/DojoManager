@@ -5,6 +5,7 @@ import '../../entities/weekly_plan.dart';
 import '../../value_objects/belt.dart';
 import '../../../core/config/training_activities_config.dart';
 import '../../../infrastructure/repositories/firebase_dojo_repository.dart';
+import 'generate_learning_coefficients.dart';
 
 class DaySimulationResult {
   final DayOfWeek day;
@@ -78,14 +79,25 @@ class SimulateDayUseCase {
       int ph = 0;
       int xp = TrainingActivitiesConfig.baseXPPerActivity;
 
+      final coefficients = student.learningCoefficients.isEmpty
+          ? GenerateLearningCoefficients().execute(student.id)
+          : student.learningCoefficients;
+
       for (final act in activities) {
         act.statBonus.forEach((stat, val) {
-          statGains[stat] = (statGains[stat] ?? 0) + val;
+          final coeff = coefficients[stat] ?? 1.0;
+          final gained = (val * coeff).round().clamp(0, val * 2);
+          statGains[stat] = (statGains[stat] ?? 0) + gained;
         });
         fatigue += act.fatigueAdd;
         ph      += act.totalPH;
         xp      += act.xpBonus;
       }
+
+      final avgCoeff = coefficients.values.isEmpty
+          ? 1.0
+          : coefficients.values.reduce((a, b) => a + b) / coefficients.values.length;
+      xp = (xp * avgCoeff).round();
 
       // Si es día de descanso, recupera fatiga
       if (plan.type == DayType.rest) {

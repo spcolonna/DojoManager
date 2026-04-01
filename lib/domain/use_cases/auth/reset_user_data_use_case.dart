@@ -9,7 +9,6 @@ class ResetUserDataUseCase {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
-    // 1 — Borrar todos los estudiantes del dojo del usuario
     final dojos = await _firestore
         .collection('dojos')
         .where('ownerId', isEqualTo: uid)
@@ -24,11 +23,19 @@ class ResetUserDataUseCase {
       for (final s in students.docs) {
         await s.reference.delete();
       }
-      // Borrar el dojo
+
+      // ← NUEVO: Borrar subcolecciones del dojo
+      for (final sub in ['weekly', 'tournament']) {
+        final subDocs = await dojo.reference.collection(sub).get();
+        for (final d in subDocs.docs) {
+          await d.reference.delete();
+        }
+      }
+
       await dojo.reference.delete();
     }
 
-    // 2 — Borrar el perfil/progreso del usuario
+    // Borrar perfil
     await _firestore
         .collection('users')
         .doc(uid)
@@ -36,7 +43,16 @@ class ResetUserDataUseCase {
         .doc('progress')
         .delete();
 
-    // 3 — Sign out
+    // ← NUEVO: Borrar mensajes
+    final messages = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('messages')
+        .get();
+    for (final m in messages.docs) {
+      await m.reference.delete();
+    }
+
     await _auth.signOut();
   }
 }

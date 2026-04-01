@@ -38,7 +38,6 @@ class TournamentNotifier extends StateNotifier<Tournament?> {
 
     _aiOpponents = _aiGen.execute(
       playerStyleId: dojo.styleId,
-      beltLevel: dojo.level.clamp(1, 10),
       divisionLevel: 1,
       count: rivalCount,
       seed: seed,
@@ -81,11 +80,10 @@ class TournamentNotifier extends StateNotifier<Tournament?> {
 
     final seed = dojo.currentSeason * 1000 + dojo.currentWeek;
 
-    final rivalCount = TournamentConfig.leagueTeamsCount - 1;
+    const rivalCount = TournamentConfig.leagueTeamsCount - 1;
 
     _aiOpponents = _aiGen.execute(
       playerStyleId: dojo.styleId,
-      beltLevel: dojo.level.clamp(1, 10),
       divisionLevel: 1,
       count: rivalCount,
       seed: seed,
@@ -149,6 +147,7 @@ class TournamentNotifier extends StateNotifier<Tournament?> {
   Future<TournamentMatch?> simulateNextMatch({
     required List<dynamic> playerFighters,
     required List<FightStrategy> playerStrategies,
+    Map<int, List<String>> enrolledByBelt = const {},
   }) async {
     final match = nextPlayerMatch;
     if (match == null || state == null) return null;

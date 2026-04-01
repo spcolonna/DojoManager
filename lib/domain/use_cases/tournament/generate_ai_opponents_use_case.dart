@@ -5,18 +5,14 @@ import '../../value_objects/student_stats.dart';
 import '../../value_objects/belt.dart';
 import '../../../core/config/tournament_config.dart';
 
-/// Genera rivales de IA proceduralmente.
-/// Los stats se calculan en función de la división y el nivel de faja
-/// con varianza aleatoria — mismo seed → mismo rival (reproducible).
 class GenerateAIOpponentsUseCase {
 
   List<AIOpponent> execute({
     required String playerStyleId,
-    required int beltLevel,
     required int divisionLevel,
     required int count,
     required int seed,
-    String? forceStyle,  // null = inter-style (aleatorio), valor = liga local
+    String? forceStyle,
   }) {
     final rng = Random(seed);
     final opponents = <AIOpponent>[];
@@ -25,26 +21,31 @@ class GenerateAIOpponentsUseCase {
     if (!styles.contains(playerStyleId)) styles.add(playerStyleId);
 
     for (int i = 0; i < count; i++) {
-      // Liga local → mismo estilo siempre
-      // Copa inter-estilos → estilo aleatorio (pero nunca el del jugador dos veces seguidas)
       final style = forceStyle ?? styles[rng.nextInt(styles.length)];
       final name  = _generateTeamName(style, rng);
 
-      final fighterCount = 2 + rng.nextInt(2);
-      final fighters = List.generate(fighterCount, (j) => _generateFighter(
-        id: 'ai_${seed}_${i}_$j',
-        styleId: style,
-        beltLevel: beltLevel,
-        divisionLevel: divisionLevel,
-        rng: rng,
-      ));
+      // Generar fighters para todos los niveles de faja 1-10
+      final fightersByBelt = <int, List<AIStudent>>{};
+      for (int belt = 1; belt <= 10; belt++) {
+        final fighterCount = 1 + rng.nextInt(2); // 1 o 2 por belt
+        fightersByBelt[belt] = List.generate(
+          fighterCount,
+              (j) => _generateFighter(
+            id: 'ai_${seed}_${i}_b${belt}_$j',
+            styleId: style,
+            beltLevel: belt,
+            divisionLevel: divisionLevel,
+            rng: rng,
+          ),
+        );
+      }
 
       opponents.add(AIOpponent(
         id: 'ai_team_${seed}_$i',
         teamName: name,
         styleId: style,
         divisionLevel: divisionLevel,
-        fighters: fighters,
+        fightersByBelt: fightersByBelt,
       ));
     }
 
@@ -58,15 +59,12 @@ class GenerateAIOpponentsUseCase {
     required int divisionLevel,
     required Random rng,
   }) {
-    // Base stats centrados en el nivel de faja y división
-    // beltLevel 1–10, divisionLevel 1–5
     final baseValue = 8 + (beltLevel * 2) + (divisionLevel * 2);
-    final variance  = 4; // ±4 por stat
+    const variance  = 4;
 
     int randomStat(int base) =>
         (base + rng.nextInt(variance * 2) - variance).clamp(5, 40);
 
-    // Aplicar el perfil del estilo como multiplicador
     final profile = _styleProfile(styleId);
     final stats = StudentStats(
       str: randomStat((baseValue * profile['str']!).round()),
@@ -86,7 +84,6 @@ class GenerateAIOpponentsUseCase {
     );
   }
 
-  // Perfil de distribución de stats por estilo (multiplicadores)
   Map<String, double> _styleProfile(String styleId) => switch (styleId) {
     'kung_fu'   => {'str': 0.9, 'spd': 1.0, 'tec': 1.1, 'def': 0.9, 'men': 1.1},
     'karate'    => {'str': 1.1, 'spd': 0.9, 'tec': 1.1, 'def': 1.0, 'men': 0.9},
@@ -118,10 +115,10 @@ class GenerateAIOpponentsUseCase {
   }
 
   String _fighterName(Random rng) {
-    const first = ['Kai', 'Ryu', 'Jin', 'Hiro', 'Sato', 'Chen', 'Liu', 'Park',
-      'Kim', 'Dae', 'Bruno', 'Marco', 'Ivan', 'Erik', 'Lars'];
-    const last  = ['Tanaka', 'Yamamoto', 'Lee', 'Kim', 'Chen', 'Wang', 'Silva',
-      'Santos', 'Berg', 'Holm', 'Cruz', 'Diaz', 'Park', 'Han'];
+    const first = ['Kai', 'Ryu', 'Jin', 'Hiro', 'Sato', 'Chen', 'Liu',
+      'Park', 'Kim', 'Dae', 'Bruno', 'Marco', 'Ivan', 'Erik', 'Lars'];
+    const last  = ['Tanaka', 'Yamamoto', 'Lee', 'Kim', 'Chen', 'Wang',
+      'Silva', 'Santos', 'Berg', 'Holm', 'Cruz', 'Diaz', 'Park', 'Han'];
     return '${first[rng.nextInt(first.length)]} '
         '${last[rng.nextInt(last.length)]}';
   }

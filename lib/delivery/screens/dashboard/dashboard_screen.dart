@@ -5,6 +5,7 @@ import 'package:grand_dojo/core/constants/app_colors.dart';
 import 'package:grand_dojo/core/utils/l10n_helper.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../../../core/providers/messages_provider.dart';
 import '../../../core/providers/navigation_provider.dart';
 import '../settings/settings_screen.dart';
@@ -34,6 +35,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = l10n(context);
+
+    ref.listen(appStateProvider, (prev, next) {
+      if (next.route == AppRoute.dashboard) {
+        ref.read(messagesProvider.notifier).load();
+      }
+    });
 
     ref.listen<int>(navigationProvider, (_, index) {
       setState(() => _selectedIndex = index);

@@ -108,6 +108,23 @@ class AppStateNotifier extends StateNotifier<AppState> {
 
     await _repo.markOnboardingCompleted(userId);
 
+    final inviteId = 'league_invite_s${dojo.currentSeason}_${dojo.styleId}';
+    await _repo.addMessage(
+      userId,
+      AppMessage(
+        id: inviteId,
+        type: MessageType.tournamentInvite,
+        titleKey: 'msgLeagueInviteTitle',
+        bodyKey: 'msgLeagueInviteBody',
+        params: {
+          'style': dojo.styleId,
+          'season': dojo.currentSeason,
+        },
+        isRead: false,
+        createdAt: DateTime.now(),
+      ),
+    );
+
     state = AppState(
       route: AppRoute.dashboard,
       dojo: dojo,

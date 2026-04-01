@@ -24,15 +24,19 @@ class NextMatchTab extends ConsumerStatefulWidget {
 }
 
 class _NextMatchTabState extends ConsumerState<NextMatchTab> {
-  List<String> _enrolledIds = [];
-  List<FightStrategy> _strategies = [];
-  final bool _isSimulating = false;
+  // NUEVO: organizado por nivel de faja
+  Map<int, List<String>> _enrolledByBelt = {};
+  Map<int, List<FightStrategy>> _strategiesByBelt = {};
+  bool _isSimulating = false;
+
+  bool get _hasEnrolled =>
+      _enrolledByBelt.values.any((ids) => ids.isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
-    final loc        = l10n(context);
-    final tournament = widget.tournament;
-    final nextMatch  = ref.read(tournamentProvider.notifier).nextPlayerMatch;
+    final loc           = l10n(context);
+    final tournament    = widget.tournament;
+    final nextMatch     = ref.read(tournamentProvider.notifier).nextPlayerMatch;
     final studentsAsync = ref.watch(studentsProvider);
 
     if (nextMatch == null) {
@@ -51,13 +55,15 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
       );
     }
 
-    final playerTeamId = tournament.playerTeam?.id ?? '';
-    final isHome       = nextMatch.homeTeamId == playerTeamId;
-    final rivalTeamId  = isHome ? nextMatch.awayTeamId : nextMatch.homeTeamId;
-    final rivalTeam    = tournament.teams
+    final playerTeamId  = tournament.playerTeam?.id ?? '';
+    final isHome        = nextMatch.homeTeamId == playerTeamId;
+    final rivalTeamId   = isHome ? nextMatch.awayTeamId : nextMatch.homeTeamId;
+    final rivalTeamList = tournament.teams
         .where((t) => t.id == rivalTeamId)
-        .firstOrNull;
-    final rival = ref.read(tournamentProvider.notifier).rivalFor(rivalTeamId);
+        .toList();
+    final rivalTeam     = rivalTeamList.isEmpty ? null : rivalTeamList.first;
+    final rival         =
+    ref.read(tournamentProvider.notifier).rivalFor(rivalTeamId);
     final rivalStyleColor =
         AppColors.colorByStyle[rivalTeam?.styleId ?? ''] ?? AppColors.redLight;
 
@@ -106,7 +112,8 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                             Container(
                               width: 52, height: 52,
                               decoration: BoxDecoration(
-                                color: AppColors.goldPrimary.withValues(alpha: 0.15),
+                                color: AppColors.goldPrimary
+                                    .withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                     color: AppColors.goldPrimary
@@ -120,8 +127,7 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                               tournament.playerTeam?.name ?? '',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.rajdhani(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 13, fontWeight: FontWeight.w700,
                                 color: AppColors.goldLight,
                               ),
                             ),
@@ -130,12 +136,12 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                       ),
                       // VS
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           loc.tournamentVs.toUpperCase(),
                           style: GoogleFonts.cinzelDecorative(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 22, fontWeight: FontWeight.bold,
                             color: AppColors.redAction,
                           ),
                         ),
@@ -148,7 +154,10 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                               width: 52, height: 52,
                               decoration: BoxDecoration(
                                 color: rivalStyleColor.withValues(alpha: 0.15),
-                                border: Border.all(color: rivalStyleColor.withValues(alpha: 0.5)),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: rivalStyleColor
+                                        .withValues(alpha: 0.5)),
                               ),
                               child: Icon(Icons.sports_mma_rounded,
                                   color: rivalStyleColor, size: 26),
@@ -158,8 +167,7 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                               rivalTeam?.name ?? '',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.rajdhani(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 13, fontWeight: FontWeight.w700,
                                 color: rivalStyleColor,
                               ),
                             ),
@@ -180,17 +188,19 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
 
             const SizedBox(height: 16),
 
-            // ── Inscripción de estudiantes ───────────────────────────
-            EnrollmentSection(
-              students: students,
-              enrolledIds: _enrolledIds,
-              strategies: _strategies,
-              onChanged: (ids, strats) => setState(() {
-                _enrolledIds = ids;
-                _strategies  = strats;
-              }),
-              loc: loc,
-            ),
+            // ── Inscripción por categoría de faja ───────────────────
+            if (rival != null)
+              EnrollmentSection(
+                students: students,
+                rival: rival,
+                enrolledByBelt: _enrolledByBelt,
+                strategiesByBelt: _strategiesByBelt,
+                onChanged: (enrolled, strategies) => setState(() {
+                  _enrolledByBelt    = enrolled;
+                  _strategiesByBelt  = strategies;
+                }),
+                loc: loc,
+              ),
 
             const SizedBox(height: 20),
 
@@ -198,7 +208,7 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _enrolledIds.isEmpty || _isSimulating
+                onPressed: !_hasEnrolled || _isSimulating
                     ? null
                     : () => _simulate(context, students),
                 style: ElevatedButton.styleFrom(
@@ -216,8 +226,7 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                     : Text(
                   loc.tournamentSimulateMatch,
                   style: GoogleFonts.rajdhani(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 15, fontWeight: FontWeight.w800,
                     letterSpacing: 1,
                   ),
                 ),
@@ -229,64 +238,104 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
     );
   }
 
-  Future<void> _simulate(BuildContext context, List<Student> students) async {
-    final enrolled = students
-        .where((s) => _enrolledIds.contains(s.id))
-        .toList();
-
-    if (enrolled.isEmpty) return;
+  Future<void> _simulate(
+      BuildContext context, List<Student> students) async {
+    if (!_hasEnrolled) return;
 
     final tournament   = ref.read(tournamentProvider)!;
     final playerTeamId = tournament.playerTeam?.id ?? '';
-    final nextMatch    = ref.read(tournamentProvider.notifier).nextPlayerMatch;
+    final nextMatch =
+        ref.read(tournamentProvider.notifier).nextPlayerMatch;
     if (nextMatch == null) return;
 
-    final isHome     = nextMatch.homeTeamId == playerTeamId;
-    final rivalTeamId = isHome ? nextMatch.awayTeamId : nextMatch.homeTeamId;
-    final rival      = ref.read(tournamentProvider.notifier).rivalFor(rivalTeamId);
-    if (rival == null || rival.fighters.isEmpty) return;
+    final isHome      = nextMatch.homeTeamId == playerTeamId;
+    final rivalTeamId =
+    isHome ? nextMatch.awayTeamId : nextMatch.homeTeamId;
+    final rival =
+    ref.read(tournamentProvider.notifier).rivalFor(rivalTeamId);
+    if (rival == null) return;
 
-    final blueFighter  = FightFighter.fromStudent(enrolled.first);
-    final redFighter   = FightFighter.fromAI(rival.fighters.first);
-    final rivalColor   = AppColors.colorByStyle[rival.styleId] ?? AppColors.redLight;
+    final rivalColor =
+        AppColors.colorByStyle[rival.styleId] ?? AppColors.redLight;
 
-    Navigator.of(context).push(PageRouteBuilder(
-      pageBuilder: (_, __, ___) => FightArenaScreen(
-        blueFighter: blueFighter,
-        redFighter: redFighter,
-        blueTeamId: playerTeamId,
-        redTeamId: rivalTeamId,
-        blueColor: AppColors.goldPrimary,
-        redColor: rivalColor,
-        blueName: enrolled.first.nameKey,
-        redName: rival.teamName,
-        initialStrategy: _strategies.isNotEmpty
-            ? _strategies.first
-            : FightStrategy.technical,
-        onComplete: (blueWins, redWins) async {
-          Navigator.of(context).pop();
-          final result = await ref
-              .read(tournamentProvider.notifier)
-              .simulateNextMatch(
-            playerFighters: enrolled,
-            playerStrategies: _strategies,
-          );
+    // Ordenar las categorías inscritas por faja ascendente
+    final enrolledBelts = _enrolledByBelt.keys
+        .where((b) => _enrolledByBelt[b]!.isNotEmpty)
+        .toList()
+      ..sort();
 
-          ref.read(trainingViewModelProvider.notifier).markTournamentDayComplete();
-          
-          if (result != null && context.mounted) {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => MatchResultScreen(
-                match: result,
-                tournament: ref.read(tournamentProvider)!,
-              ),
-            ));
-          }
-        },
-      ),
-      transitionDuration: const Duration(milliseconds: 500),
-      transitionsBuilder: (_, anim, __, child) =>
-          FadeTransition(opacity: anim, child: child),
-    ));
+    if (enrolledBelts.isEmpty) return;
+
+    setState(() => _isSimulating = true);
+
+    // Simular categoría por categoría secuencialmente
+    for (final belt in enrolledBelts) {
+      final enrolledIds = _enrolledByBelt[belt] ?? [];
+      final enrolled = students
+          .where((s) => enrolledIds.contains(s.id))
+          .toList();
+      if (enrolled.isEmpty) continue;
+
+      final rivalFighters = rival.fightersForBelt(belt);
+      if (rivalFighters.isEmpty) continue;
+
+      final blueFighter = FightFighter.fromStudent(enrolled.first);
+      final redFighter  = FightFighter.fromAI(rivalFighters.first);
+      final strategies  = _strategiesByBelt[belt] ?? [];
+
+      // Mostrar arena para esta categoría
+      if (!context.mounted) break;
+      await Navigator.of(context).push(PageRouteBuilder(
+        pageBuilder: (_, __, ___) => FightArenaScreen(
+          blueFighter: blueFighter,
+          redFighter: redFighter,
+          blueTeamId: playerTeamId,
+          redTeamId: rivalTeamId,
+          blueColor: AppColors.goldPrimary,
+          redColor: rivalColor,
+          blueName: enrolled.first.nameKey,
+          redName: rival.teamName,
+          initialStrategy: strategies.isNotEmpty
+              ? strategies.first
+              : FightStrategy.technical,
+          onComplete: (blueWins, redWins) {
+            Navigator.of(context).pop();
+          },
+        ),
+        transitionDuration: const Duration(milliseconds: 500),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ));
+    }
+
+    // Después de todos los combates del jugador → simular resultado completo
+    if (!context.mounted) return;
+
+    final result = await ref
+        .read(tournamentProvider.notifier)
+        .simulateNextMatch(
+      playerFighters: _enrolledByBelt.values
+          .expand((ids) => students.where((s) => ids.contains(s.id)))
+          .toList(),
+      playerStrategies: _strategiesByBelt.values
+          .expand((s) => s)
+          .toList(),
+      enrolledByBelt: _enrolledByBelt,
+    );
+
+    ref
+        .read(trainingViewModelProvider.notifier)
+        .markTournamentDayComplete();
+
+    setState(() => _isSimulating = false);
+
+    if (result != null && context.mounted) {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => MatchResultScreen(
+          match: result,
+          tournament: ref.read(tournamentProvider)!,
+        ),
+      ));
+    }
   }
 }

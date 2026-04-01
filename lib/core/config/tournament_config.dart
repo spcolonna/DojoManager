@@ -55,4 +55,21 @@ class TournamentConfig {
   static const Map<int, int> maxRecruitBeltByDojoLevel = {
     1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 10,
   };
+
+  // ─── PUNTOS POR CATEGORÍA ─────────────────────────────────────────────────
+  static const Map<int, int> pointsByBelt = {
+    1: 3,   // Blanca
+    2: 6,   // Amarilla
+    3: 9,   // Naranja
+    4: 12,  // Verde
+    5: 15,  // Azul
+    6: 18,  // Morada
+    7: 21,  // Marrón
+    8: 24,  // Roja
+    9: 27,  // Roja-Negra
+    10: 30, // Negra
+  };
+
+  static int walkoverPointsFor(int beltLevel) =>
+      (pointsByBelt[beltLevel]! / 3).round();
 }

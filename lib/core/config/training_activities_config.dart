@@ -43,7 +43,7 @@ class TrainingActivitiesConfig {
       icon: 'fitness_center',
       statBonus: {'str': 3},
       fatigueAdd: 20,
-      phBonus: 3,
+      phBonus: 1,
     ),
 
     // ── VELOCIDAD / CARDIO ─────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ class TrainingActivitiesConfig {
       icon: 'directions_run',
       statBonus: {'spd': 3},
       fatigueAdd: 20,
-      phBonus: 2,
+      phBonus: 1,
     ),
 
     // ── TÉCNICA ───────────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ class TrainingActivitiesConfig {
       icon: 'self_improvement',
       statBonus: {'tec': 3},
       fatigueAdd: 10,
-      phBonus: 3,
+      phBonus: 1,
     ),
 
     // ── DEFENSA / MENTE ───────────────────────────────────────────────────────
@@ -151,7 +151,7 @@ class TrainingActivitiesConfig {
       icon: 'shield',
       statBonus: {'def': 3},
       fatigueAdd: 12,
-      phBonus: 2,
+      phBonus: 1,
     ),
 
     // ── COMBATE ───────────────────────────────────────────────────────────────
@@ -163,7 +163,7 @@ class TrainingActivitiesConfig {
       icon: 'sports_kabaddi',
       statBonus: {'str': 1, 'spd': 1, 'tec': 1},
       fatigueAdd: 25,
-      phBonus: 4,
+      phBonus: 2,
       xpBonus: 20,
     ),
     TrainingActivity(
@@ -174,7 +174,7 @@ class TrainingActivitiesConfig {
       icon: 'sports_kabaddi',
       statBonus: {'tec': 2, 'men': 1},
       fatigueAdd: 18,
-      phBonus: 3,
+      phBonus: 1,
       xpBonus: 12,
     ),
     TrainingActivity(
@@ -185,7 +185,7 @@ class TrainingActivitiesConfig {
       icon: 'psychology',
       statBonus: {'men': 3},
       fatigueAdd: 8,
-      phBonus: 3,
+      phBonus: 1,
     ),
 
     // ── RECUPERACIÓN ──────────────────────────────────────────────────────────
@@ -222,7 +222,7 @@ class TrainingActivitiesConfig {
   static const int maxActivitiesPerWeek   = 5;
   static const int fatigueInjuryThreshold = 85;
   static const int injuryRiskPercent      = 8;
-  static const int basePHPerActivity      = 1;
+  static const int basePHPerActivity      = 0; 
   static const int baseXPPerActivity      = 8;
 
   // ── HELPERS ───────────────────────────────────────────────────────────────

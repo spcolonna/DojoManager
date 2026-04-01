@@ -8,7 +8,7 @@ class SkillTreeConfig {
   // depth 0 = nodo raíz "Fundamentos"
   // depth 1 = primer nivel de cada rama
   // depth 4 = nodos Elite (requieren faja mínima)
-  static const List<int> phCostByNodeDepth = [1, 2, 4, 8, 20];
+  static const List<int> phCostByNodeDepth = [1, 3, 8, 20, 50];
 
   // ─── NIVEL DE FAJA MÍNIMO PARA NODOS ELITE ────────────────────────────────
   static const int minBeltLevelForEliteNodes = 7; // faja marrón

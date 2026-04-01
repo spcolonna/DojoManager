@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../core/providers/tournament_provider.dart';
+import '../../../domain/day_plan.dart';
+import '../../../domain/entities/weekly_plan.dart';
 import '../../widgets/no_tournament_view.dart';
 import '../training/training_view_model.dart';
 import 'next_match_tab.dart';
@@ -36,16 +38,33 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
 
   @override
   Widget build(BuildContext context) {
-    final loc          = l10n(context);
-    final tournament   = ref.watch(tournamentProvider);
+    final loc = l10n(context);
+    final tournament = ref.watch(tournamentProvider);
     final trainingState = ref.watch(trainingViewModelProvider);
 
-    // Día actual del calendario
-    final currentDay   = trainingState.currentDay;
     final tournamentDay = trainingState.plan.tournamentDay;
-    final isMatchDay   = currentDay != null &&
-        tournamentDay != null &&
-        currentDay == tournamentDay;
+    final tournamentDayPlan =
+        tournamentDay != null ? trainingState.plan.days[tournamentDay] : null;
+
+    // Es día de combate si:
+    // 1. Existe un día de torneo en el plan
+    // 2. Ese día no fue simulado (el combate no se jugó aún)
+    // 3. Los días de entrenamiento previos al torneo están todos simulados
+    //    (no podés jugar el sábado si el lunes todavía no entrenaste)
+    final daysBeforeTournament = tournamentDay != null
+        ? trainingState.plan.days.entries.where((e) =>
+            e.key != tournamentDay &&
+            e.value.type == DayType.training &&
+            DayOfWeek.values.indexOf(e.key) <
+                DayOfWeek.values.indexOf(tournamentDay))
+        : <MapEntry<DayOfWeek, DayPlan>>[].cast<MapEntry<DayOfWeek, DayPlan>>();
+
+    final allPriorDone = daysBeforeTournament.every((e) => e.value.isSimulated);
+
+    final isMatchDay = tournamentDay != null &&
+        tournamentDayPlan != null &&
+        !tournamentDayPlan.isSimulated &&
+        allPriorDone;
 
     return Scaffold(
       backgroundColor: AppColors.bgDeep,
@@ -98,7 +117,9 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
               labelColor: Colors.white,
               unselectedLabelColor: AppColors.textTertiary,
               labelStyle: GoogleFonts.rajdhani(
-                  fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5),
               unselectedLabelStyle: GoogleFonts.rajdhani(
                   fontSize: 12, fontWeight: FontWeight.w500),
               tabs: [
@@ -113,22 +134,21 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen>
       body: tournament == null
           ? const NoTournamentView()
           : TabBarView(
-        controller: _tabs,
-        children: [
-          // ← La única pestaña que cambia según el día
-          isMatchDay
-              ? NextMatchTab(tournament: tournament)
-              : tournamentDay == null
-              ? const NoTournamentView()
-              : NotMatchDayView(
-            tournament: tournament,
-            tournamentDay: tournamentDay, 
-            trainingState: trainingState,
-          ),
-          StandingsTab(tournament: tournament),
-          ResultsTab(tournament: tournament),
-        ],
-      ),
+              controller: _tabs,
+              children: [
+                isMatchDay
+                    ? NextMatchTab(tournament: tournament)
+                    : tournamentDay == null
+                        ? const NoTournamentView()
+                        : NotMatchDayView(
+                            tournament: tournament,
+                            tournamentDay: tournamentDay,
+                            trainingState: trainingState,
+                          ),
+                StandingsTab(tournament: tournament),
+                ResultsTab(tournament: tournament),
+              ],
+            ),
     );
   }
 }

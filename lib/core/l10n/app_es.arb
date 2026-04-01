@@ -424,7 +424,6 @@
   "tournamentRivalPreview": "Scoutear Rival",
   "tournamentRivalStyle": "Estilo",
   "tournamentRivalStrength": "Fuerza estimada",
-  "tournamentFightOrder": "Orden de Combate",
   "tournamentFight": "Combate {n}",
   "@tournamentFight": { "placeholders": { "n": { "type": "int" } } },
   "tournamentNoResults": "Sin partidos jugados todavía",
@@ -529,5 +528,15 @@
   "talentNormal": "Normal",
   "talentHardWorker": "Con esfuerzo",
   "talentLimited": "Limitado",
-  "talentLocked": "Usá un Scout Premium para revelar el potencial de este estudiante"
+  "talentLocked": "Usá un Scout Premium para revelar el potencial de este estudiante",
+
+  "tournamentFightOrder": "Orden de combate",
+  "tournamentFightOrderThird": "3er combate: Ganador de los anteriores",
+  "tournamentFightNumber": "Combate {n} de 3",
+  "@tournamentFightNumber": { "placeholders": { "n": { "type": "int" } } },
+  "tournamentFightScore": "{blue} {blueWins} - {redWins} {red}",
+  "@tournamentFightScore": { "placeholders": { "blue": {"type": "String"}, "blueWins": {"type": "int"}, "redWins": {"type": "int"}, "red": {"type": "String"} } },
+  "tournamentNextFighter": "Próximo luchador",
+  "tournamentRoundTimer": "Round {round} · {seconds}s",
+  "@tournamentRoundTimer": { "placeholders": { "round": {"type": "int"}, "seconds": {"type": "int"} } }
 }

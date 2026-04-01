@@ -14,11 +14,14 @@ class EnrollmentSection extends StatefulWidget {
   final AIOpponent rival;
   final Map<int, List<String>> enrolledByBelt;
   final Map<int, List<FightStrategy>> strategiesByBelt;
+  final Map<int, List<int>> fightOrderByBelt;
   final void Function(
       Map<int, List<String>> enrolled,
       Map<int, List<FightStrategy>> strategies,
+      Map<int, List<int>> fightOrder,
       ) onChanged;
   final dynamic loc;
+
 
   const EnrollmentSection({
     super.key,
@@ -26,6 +29,7 @@ class EnrollmentSection extends StatefulWidget {
     required this.rival,
     required this.enrolledByBelt,
     required this.strategiesByBelt,
+    required this.fightOrderByBelt,
     required this.onChanged,
     required this.loc,
   });
@@ -37,12 +41,14 @@ class EnrollmentSection extends StatefulWidget {
 class _EnrollmentSectionState extends State<EnrollmentSection> {
   late Map<int, List<String>> _enrolled;
   late Map<int, List<FightStrategy>> _strategies;
+  late Map<int, List<int>> _fightOrder;
 
   @override
   void initState() {
     super.initState();
     _enrolled   = Map.from(widget.enrolledByBelt);
     _strategies = Map.from(widget.strategiesByBelt);
+    _fightOrder = Map.from(widget.fightOrderByBelt);
   }
 
   // Estudiantes del jugador agrupados por faja
@@ -66,15 +72,30 @@ class _EnrollmentSectionState extends State<EnrollmentSection> {
         final strats = List<FightStrategy>.from(_strategies[beltLevel] ?? []);
         if (strats.length > current.length) strats.removeLast();
         _strategies[beltLevel] = strats;
+        _fightOrder[beltLevel] = List.generate(current.length, (i) => i);
       } else if (current.length < TournamentConfig.maxStudentsPerBeltPerTournament) {
         current.add(studentId);
         final strats = List<FightStrategy>.from(_strategies[beltLevel] ?? []);
         strats.add(FightStrategy.technical);
         _strategies[beltLevel] = strats;
+        _fightOrder[beltLevel] = List.generate(current.length, (i) => i);
       }
       _enrolled[beltLevel] = current;
     });
-    widget.onChanged(_enrolled, _strategies);
+    widget.onChanged(_enrolled, _strategies, _fightOrder);
+  }
+
+  void _swapOrder(int beltLevel) {
+    setState(() {
+      final order = List<int>.from(_fightOrder[beltLevel] ?? [0, 1]);
+      if (order.length >= 2) {
+        final tmp = order[0];
+        order[0] = order[1];
+        order[1] = tmp;
+        _fightOrder[beltLevel] = order;
+      }
+    });
+    widget.onChanged(_enrolled, _strategies, _fightOrder);
   }
 
   void _setStrategy(int beltLevel, int index, FightStrategy strategy) {
@@ -83,7 +104,7 @@ class _EnrollmentSectionState extends State<EnrollmentSection> {
       if (index < strats.length) strats[index] = strategy;
       _strategies[beltLevel] = strats;
     });
-    widget.onChanged(_enrolled, _strategies);
+    widget.onChanged(_enrolled, _strategies, _fightOrder);
   }
 
   @override
@@ -351,6 +372,21 @@ class _EnrollmentSectionState extends State<EnrollmentSection> {
                   }).toList(),
                 ),
               ),
+              if (enrolledInBelt.length == 2) ...[
+                const Divider(height: 1, color: AppColors.bgDivider),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                  child: _FightOrderWidget(
+                    students: beltStudents
+                        .where((s) => enrolledInBelt.contains(s.id))
+                        .toList(),
+                    order: _fightOrder[belt] ?? [0, 1],
+                    beltColor: beltColor,
+                    onSwap: () => _swapOrder(belt),
+                    loc: loc,
+                  ),
+                ),
+              ],
             ],
           ),
         );
@@ -364,4 +400,144 @@ class _EnrollmentSectionState extends State<EnrollmentSection> {
     7 => 'brown',   8 => 'red',       9 => 'red_black',
     10 => 'black',  _ => 'white',
   };
+}
+
+class _FightOrderWidget extends StatelessWidget {
+  final List<Student> students;
+  final List<int> order;
+  final Color beltColor;
+  final VoidCallback onSwap;
+  final dynamic loc;
+
+  const _FightOrderWidget({
+    required this.students,
+    required this.order,
+    required this.beltColor,
+    required this.onSwap,
+    required this.loc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (students.length < 2 || order.length < 2) return const SizedBox.shrink();
+    final first  = order[0] < students.length ? students[order[0]] : students[0];
+    final second = order[1] < students.length ? students[order[1]] : students[1];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.format_list_numbered_rounded,
+                color: beltColor, size: 12),
+            const SizedBox(width: 6),
+            Text(
+              loc.tournamentFightOrder.toUpperCase(),
+              style: GoogleFonts.rajdhani(
+                  fontSize: 9, fontWeight: FontWeight.w800,
+                  color: beltColor, letterSpacing: 1.5),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            // 1er combate
+            Expanded(
+              child: _OrderSlot(
+                  number: 1, name: first.nameKey, color: beltColor),
+            ),
+            // Botón swap
+            GestureDetector(
+              onTap: onSwap,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: beltColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: beltColor.withValues(alpha: 0.3)),
+                ),
+                child: Icon(Icons.swap_horiz_rounded,
+                    color: beltColor, size: 16),
+              ),
+            ),
+            // 2do combate
+            Expanded(
+              child: _OrderSlot(
+                  number: 2, name: second.nameKey, color: beltColor),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        // 3er combate siempre es el ganador
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+              horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.bgElevated,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.bgDivider),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.emoji_events_rounded,
+                  color: AppColors.goldMuted, size: 12),
+              const SizedBox(width: 6),
+              Text(
+                loc.tournamentFightOrderThird,
+                style: GoogleFonts.rajdhani(
+                    fontSize: 11, color: AppColors.textTertiary),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OrderSlot extends StatelessWidget {
+  final int number;
+  final String name;
+  final Color color;
+
+  const _OrderSlot({
+    required this.number,
+    required this.name,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '${number}º',
+            style: GoogleFonts.cinzelDecorative(
+                fontSize: 12, fontWeight: FontWeight.bold,
+                color: color),
+          ),
+          Text(
+            name,
+            style: GoogleFonts.rajdhani(
+                fontSize: 11, color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
 }

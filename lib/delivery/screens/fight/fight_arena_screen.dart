@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/config/fight_config.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/l10n_helper.dart';
 import '../../../domain/entities/fight.dart';
 import '../../../domain/entities/fight_fighter.dart';
 import '../../../domain/entities/fight_tick_snapshot.dart';
@@ -35,6 +36,10 @@ class FightArenaScreen extends StatefulWidget {
   final String blueName;
   final String redName;
   final FightStrategy initialStrategy;
+  final int fightNumber;
+  final int totalFights;
+  final int playerWinsSoFar;
+  final int rivalWinsSoFar;
   final void Function(int blueWins, int redWins) onComplete;
 
   const FightArenaScreen({
@@ -48,6 +53,10 @@ class FightArenaScreen extends StatefulWidget {
     required this.blueName,
     required this.redName,
     this.initialStrategy = FightStrategy.technical,
+    this.fightNumber = 1,
+    this.totalFights = 1,
+    this.playerWinsSoFar = 0,
+    this.rivalWinsSoFar = 0,
     required this.onComplete,
   });
 
@@ -60,6 +69,9 @@ class _FightArenaScreenState extends State<FightArenaScreen>
   final _rng = Random();
   final _service = FightSimulationService();
   late Ticker _ticker;
+  int _roundTimerSeconds = 15;
+  int _roundTimerAccMs   = 0;
+  static const _roundDurationSeconds = 15;
 
   _Phase _phase = _Phase.countdown;
   int _countdown = 3;
@@ -69,7 +81,7 @@ class _FightArenaScreenState extends State<FightArenaScreen>
   late FightRoundSimulation _roundSim;
   int _tickIdx = 0;
   int _tickAccMs = 0;
-  static const _tickMs = 300;
+  static const _tickMs = 1000;
 
   int _blueRoundScore = 0, _redRoundScore = 0;
   int _blueWins = 0, _redWins = 0;
@@ -147,6 +159,12 @@ class _FightArenaScreenState extends State<FightArenaScreen>
         }
       case _Phase.fighting:
         _tickAccMs += dtMs;
+        // Timer de 15s por round
+        _roundTimerAccMs += dtMs;
+        if (_roundTimerAccMs >= 1000) {
+          _roundTimerAccMs -= 1000;
+          if (_roundTimerSeconds > 0) _roundTimerSeconds--;
+        }
         while (_tickAccMs >= _tickMs) {
           _tickAccMs -= _tickMs;
           _advanceTick();
@@ -165,6 +183,8 @@ class _FightArenaScreenState extends State<FightArenaScreen>
     _redRoundScore  = 0;
     _tickIdx = 0;
     _tickAccMs = 0;
+    _roundTimerSeconds = _roundDurationSeconds;
+    _roundTimerAccMs   = 0;
     _roundSim = _service.simulateRoundToSnapshots(
       blue: widget.blueFighter,
       red: widget.redFighter,
@@ -503,6 +523,7 @@ class _FightArenaScreenState extends State<FightArenaScreen>
       color: const Color(0xFF0D0D0D),
       child: Row(
         children: [
+          // Score azul
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,10 +539,13 @@ class _FightArenaScreenState extends State<FightArenaScreen>
                       ),
                     ),
                     const SizedBox(width: 5),
-                    Text(widget.blueName,
-                        style: GoogleFonts.rajdhani(
-                            fontSize: 11, fontWeight: FontWeight.w700,
-                            color: widget.blueColor)),
+                    Flexible(
+                      child: Text(widget.blueName,
+                          style: GoogleFonts.rajdhani(
+                              fontSize: 11, fontWeight: FontWeight.w700,
+                              color: widget.blueColor),
+                          overflow: TextOverflow.ellipsis),
+                    ),
                     const SizedBox(width: 4),
                     Text('(TÚ)',
                         style: GoogleFonts.rajdhani(
@@ -535,13 +559,56 @@ class _FightArenaScreenState extends State<FightArenaScreen>
               ],
             ),
           ),
+
+          // Centro — timer + rounds ganados
           Column(
             children: [
-              Text('ROUND $_currentRound/3',
+              // Combate X de Y (si hay múltiples)
+              if (widget.totalFights > 1)
+                Text(
+                  'COMBATE ${widget.fightNumber}/${widget.totalFights}  '
+                      '${widget.playerWinsSoFar}-${widget.rivalWinsSoFar}',
+                  style: GoogleFonts.rajdhani(
+                      fontSize: 8, color: AppColors.textTertiary,
+                      letterSpacing: 1, fontWeight: FontWeight.w700),
+                ),
+              // Timer prominente
+              if (_phase == _Phase.fighting)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 48, height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _roundTimerSeconds <= 5
+                        ? AppColors.redAction.withValues(alpha: 0.2)
+                        : AppColors.bgSurface,
+                    border: Border.all(
+                      color: _roundTimerSeconds <= 5
+                          ? AppColors.redAction
+                          : AppColors.bgDivider,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$_roundTimerSeconds',
+                      style: GoogleFonts.cinzelDecorative(
+                          fontSize: 16, fontWeight: FontWeight.bold,
+                          color: _roundTimerSeconds <= 5
+                              ? AppColors.redLight
+                              : AppColors.textSecondary),
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  'R$_currentRound/3',
                   style: GoogleFonts.rajdhani(
                       fontSize: 9, color: AppColors.textTertiary,
-                      letterSpacing: 1.5, fontWeight: FontWeight.w700)),
+                      letterSpacing: 1.5, fontWeight: FontWeight.w700),
+                ),
               const SizedBox(height: 4),
+              // Rounds ganados
               Row(
                 children: List.generate(3, (i) => Container(
                   margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -553,8 +620,9 @@ class _FightArenaScreenState extends State<FightArenaScreen>
                         : i < 3 - _redWins
                         ? AppColors.bgDivider
                         : widget.redColor,
-                    boxShadow: i < _blueWins ? [BoxShadow(
-                        color: widget.blueColor, blurRadius: 4)] : null,
+                    boxShadow: i < _blueWins
+                        ? [BoxShadow(color: widget.blueColor, blurRadius: 4)]
+                        : null,
                   ),
                 )),
               ),
@@ -565,6 +633,8 @@ class _FightArenaScreenState extends State<FightArenaScreen>
                       color: AppColors.textSecondary)),
             ],
           ),
+
+          // Score rojo
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -581,10 +651,13 @@ class _FightArenaScreenState extends State<FightArenaScreen>
                       ),
                     ),
                     const SizedBox(width: 5),
-                    Text(widget.redName,
-                        style: GoogleFonts.rajdhani(
-                            fontSize: 11, fontWeight: FontWeight.w700,
-                            color: widget.redColor)),
+                    Flexible(
+                      child: Text(widget.redName,
+                          style: GoogleFonts.rajdhani(
+                              fontSize: 11, fontWeight: FontWeight.w700,
+                              color: widget.redColor),
+                          overflow: TextOverflow.ellipsis),
+                    ),
                   ],
                 ),
                 Text('$_redRoundScore',

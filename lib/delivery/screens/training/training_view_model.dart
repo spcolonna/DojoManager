@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grand_dojo/delivery/screens/training/training_screen.dart';
+import '../../../core/config/tournament_config.dart';
 import '../../../core/providers/dojo_provider.dart';
+import '../../../core/providers/tournament_provider.dart';
 import '../../../core/utils/l10n_helper.dart';
 import '../../../domain/entities/weekly_plan.dart';
 import '../../../domain/use_cases/training/simulate_day_use_case.dart';
@@ -98,6 +100,11 @@ class TrainingViewModel extends StateNotifier<TrainingState> {
     // Persistir después de cada día simulado
     await _persistPlan(updatedPlan);
 
+    final allDone = updatedPlan.days.values.every((d) => d.isSimulated);
+    if (allDone) {
+      await _advanceWeek(updatedPlan);
+    }
+
     return result;
   }
 
@@ -130,11 +137,18 @@ class TrainingViewModel extends StateNotifier<TrainingState> {
       // ── Descanso — marcar sin simular ──────────────────────────────────
       if (plan.type == DayType.rest) {
         final updatedPlan = state.plan.copyWithDay(
-          day,
-          plan.copyWith(isSimulated: true),
+          day, plan.copyWith(isSimulated: true),
         );
         state = state.copyWith(plan: updatedPlan);
         await _persistPlan(updatedPlan);
+
+        // Si era el último día → avanzar semana
+        final allDone = updatedPlan.days.values.every((d) => d.isSimulated);
+        if (allDone) {
+          state = state.copyWith(isSimulating: false);
+          await _advanceWeek(updatedPlan);
+          return; // ← cortar el loop, ya avanzamos
+        }
         continue;
       }
 
@@ -154,7 +168,6 @@ class TrainingViewModel extends StateNotifier<TrainingState> {
     state = state.copyWith(isSimulating: false);
   }
 
-  /// Marcar el día de torneo como completado (llamar después de simular el combate)
   Future<void> markTournamentDayComplete() async {
     final tournamentDay = state.plan.tournamentDay;
     if (tournamentDay == null) return;
@@ -165,6 +178,39 @@ class TrainingViewModel extends StateNotifier<TrainingState> {
     );
     state = state.copyWith(plan: updatedPlan);
     await _persistPlan(updatedPlan);
+  }
+
+  Future<void> _advanceWeek(WeeklyPlan completedPlan) async {
+    final dojo = await _ref.read(dojoProvider.future);
+    if (dojo == null) return;
+
+    final nextWeek     = dojo.currentWeek + 1;
+    final nextSeason   = nextWeek > TournamentConfig.seasonWeeks
+        ? dojo.currentSeason + 1
+        : dojo.currentSeason;
+    final weekInSeason = nextWeek > TournamentConfig.seasonWeeks ? 1 : nextWeek;
+
+    // 1 — Guardar plan nuevo ANTES de invalidar el dojo
+    final freshPlan = WeeklyPlan.defaultPlan(
+      season: nextSeason,
+      week: weekInSeason,
+    );
+    await _repo.saveWeeklyPlan(dojo.id, freshPlan);
+
+    // 2 — Actualizar dojo en Firestore
+    await _repo.updateDojo(dojo.copyWith(
+      currentWeek: weekInSeason,
+      currentSeason: nextSeason,
+    ));
+
+    // 3 — Actualizar estado local
+    state = state.copyWith(plan: freshPlan);
+
+    // 4 — Invalidar providers en orden correcto
+    _ref.invalidate(dojoProvider);
+
+    // 5 — Resetear el torneo para que loadIfActive pueda regenerarlo
+    _ref.invalidate(tournamentProvider);
   }
 
   String _dayName(DayOfWeek day, BuildContext ctx) {

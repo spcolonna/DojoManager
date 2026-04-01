@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +11,7 @@ import '../../../domain/entities/fight_fighter.dart';
 import '../../../domain/entities/student.dart';
 import '../../../domain/entities/fight.dart';
 import '../../../domain/entities/tournament/tournament.dart';
+import '../fight/category_fight_screen.dart';
 import '../fight/fight_arena_screen.dart';
 import '../training/training_view_model.dart';
 import 'match_result_screen.dart';
@@ -24,9 +27,9 @@ class NextMatchTab extends ConsumerStatefulWidget {
 }
 
 class _NextMatchTabState extends ConsumerState<NextMatchTab> {
-  // NUEVO: organizado por nivel de faja
   Map<int, List<String>> _enrolledByBelt = {};
   Map<int, List<FightStrategy>> _strategiesByBelt = {};
+  Map<int, List<int>> _fightOrderByBelt = {};
   bool _isSimulating = false;
 
   bool get _hasEnrolled =>
@@ -195,9 +198,11 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
                 rival: rival,
                 enrolledByBelt: _enrolledByBelt,
                 strategiesByBelt: _strategiesByBelt,
-                onChanged: (enrolled, strategies) => setState(() {
+                fightOrderByBelt: _fightOrderByBelt,
+                onChanged: (enrolled, strategies, fightOrder) => setState(() {
                   _enrolledByBelt    = enrolled;
                   _strategiesByBelt  = strategies;
+                  _fightOrderByBelt  = fightOrder;
                 }),
                 loc: loc,
               ),
@@ -270,42 +275,51 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
 
     // Simular categoría por categoría secuencialmente
     for (final belt in enrolledBelts) {
-      final enrolledIds = _enrolledByBelt[belt] ?? [];
-      final enrolled = students
-          .where((s) => enrolledIds.contains(s.id))
-          .toList();
+      final enrolledIds   = _enrolledByBelt[belt] ?? [];
+      final enrolled      = students.where((s) => enrolledIds.contains(s.id)).toList();
       if (enrolled.isEmpty) continue;
 
       final rivalFighters = rival.fightersForBelt(belt);
       if (rivalFighters.isEmpty) continue;
 
-      final blueFighter = FightFighter.fromStudent(enrolled.first);
-      final redFighter  = FightFighter.fromAI(rivalFighters.first);
-      final strategies  = _strategiesByBelt[belt] ?? [];
+      final strategies = _strategiesByBelt[belt] ?? [];
+      final fightOrder = _fightOrderByBelt[belt] ?? [0, 1];
 
-      // Mostrar arena para esta categoría
+      // Ordenar estudiantes según el orden elegido
+      final orderedStudents = fightOrder
+          .where((idx) => idx < enrolled.length)
+          .map((idx) => enrolled[idx])
+          .toList();
+      if (orderedStudents.isEmpty) continue;
+
       if (!context.mounted) break;
+
+      // ← Usamos un Completer para esperar que el usuario toque "RECLAMAR"
+      final completer = Completer<void>();
+
       await Navigator.of(context).push(PageRouteBuilder(
-        pageBuilder: (_, __, ___) => FightArenaScreen(
-          blueFighter: blueFighter,
-          redFighter: redFighter,
-          blueTeamId: playerTeamId,
-          redTeamId: rivalTeamId,
-          blueColor: AppColors.goldPrimary,
-          redColor: rivalColor,
-          blueName: enrolled.first.nameKey,
-          redName: rival.teamName,
-          initialStrategy: strategies.isNotEmpty
-              ? strategies.first
-              : FightStrategy.technical,
-          onComplete: (blueWins, redWins) {
+        pageBuilder: (_, __, ___) => CategoryFightScreen(
+          beltLevel: belt,
+          playerStudents: orderedStudents,
+          rivalFighters: rivalFighters,
+          playerColor: AppColors.goldPrimary,
+          rivalColor: rivalColor,
+          playerTeamName: tournament.playerTeam?.name ?? '',
+          rivalTeamName: rival.teamName,
+          playerStrategies: strategies,
+          onComplete: (result) {
+            // Solo cuando el usuario toca "RECLAMAR" → cerramos
             Navigator.of(context).pop();
+            completer.complete();
           },
         ),
         transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (_, anim, __, child) =>
             FadeTransition(opacity: anim, child: child),
       ));
+
+      // Esperar a que el usuario haya reclamado antes de pasar a la siguiente categoría
+      await completer.future;
     }
 
     // Después de todos los combates del jugador → simular resultado completo

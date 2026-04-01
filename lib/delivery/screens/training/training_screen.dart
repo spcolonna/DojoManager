@@ -127,12 +127,11 @@ class TrainingScreen extends ConsumerWidget {
           SimulationBar(
             state: state,
             onSimulateDay: () async {
-              if (state.selectedDay == null) return;
-              final day = state.selectedDay!;
-              if (state.plan.days[day]?.type == DayType.tournament) {
-                return;
-              }
-              // Animación del día
+              final day = state.currentDay;
+              if (day == null) return;
+              if (state.plan.days[day]?.type == DayType.tournament) return;
+              if (state.isDaySimulated(day)) return;
+
               await DayAdvanceAnimation.show(
                 context,
                 dayName: switch (day) {
@@ -146,15 +145,15 @@ class TrainingScreen extends ConsumerWidget {
                 },
                 onDone: () {},
               );
+
               final result = await ref
                   .read(trainingViewModelProvider.notifier)
                   .simulateDay(day);
+
               if (result != null && context.mounted) {
-                final total = result.studentResults.fold(
-                    0, (s, r) => s + r.phGained);
+                final total = result.studentResults.fold(0, (s, r) => s + r.phGained);
                 if (total > 0) {
-                  FloatLabel.show(context, '+$total PH',
-                      color: AppColors.goldPrimary);
+                  FloatLabel.show(context, '+$total PH', color: AppColors.goldPrimary);
                 }
               }
             },

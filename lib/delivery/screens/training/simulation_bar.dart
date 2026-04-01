@@ -12,7 +12,7 @@ class SimulationBar extends StatelessWidget {
   final VoidCallback onSimulateWeek;
   final VoidCallback onGoToTournament;
 
-  const SimulationBar({
+  const SimulationBar({super.key, 
     required this.state,
     required this.onSimulateDay,
     required this.onSimulateWeek,
@@ -22,9 +22,8 @@ class SimulationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = l10n(context);
-    final canSimDay = state.selectedDay != null &&
-        !state.isDaySimulated(state.selectedDay!) &&
-        state.plan.days[state.selectedDay!]?.type != DayType.tournament;
+    final canSimDay = state.currentDay != null &&
+        state.plan.days[state.currentDay!]?.type != DayType.tournament;
     final canSimWeek = !state.isSimulating &&
         state.plan.days.values.any((d) => !d.isSimulated);
 

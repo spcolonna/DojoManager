@@ -425,7 +425,6 @@
   "tournamentRivalPreview": "Scout Rival",
   "tournamentRivalStyle": "Style",
   "tournamentRivalStrength": "Estimated strength",
-  "tournamentFightOrder": "Fight Order",
   "tournamentFight": "Fight {n}",
   "@tournamentFight": { "placeholders": { "n": { "type": "int" } } },
   "tournamentNoResults": "No matches played yet",
@@ -530,5 +529,15 @@
   "talentNormal": "Normal",
   "talentHardWorker": "Hard Worker",
   "talentLimited": "Limited",
-  "talentLocked": "Use a Premium Scout to reveal this student's potential"
+  "talentLocked": "Use a Premium Scout to reveal this student's potential",
+
+  "tournamentFightOrder": "Fight order",
+  "tournamentFightOrderThird": "3rd fight: Winner of previous fights",
+  "tournamentFightNumber": "Fight {n} of 3",
+  "@tournamentFightNumber": { "placeholders": { "n": { "type": "int" } } },
+  "tournamentFightScore": "{blue} {blueWins} - {redWins} {red}",
+  "@tournamentFightScore": { "placeholders": { "blue": {"type": "String"}, "blueWins": {"type": "int"}, "redWins": {"type": "int"}, "red": {"type": "String"} } },
+  "tournamentNextFighter": "Next fighter",
+  "tournamentRoundTimer": "Round {round} · {seconds}s",
+  "@tournamentRoundTimer": { "placeholders": { "round": {"type": "int"}, "seconds": {"type": "int"} } }
 }

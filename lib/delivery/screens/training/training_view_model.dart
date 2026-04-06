@@ -134,21 +134,8 @@ class TrainingViewModel extends StateNotifier<TrainingState> {
         return;  // ← corta el loop completamente
       }
 
-      // ── Descanso — marcar sin simular ──────────────────────────────────
       if (plan.type == DayType.rest) {
-        final updatedPlan = state.plan.copyWithDay(
-          day, plan.copyWith(isSimulated: true),
-        );
-        state = state.copyWith(plan: updatedPlan);
-        await _persistPlan(updatedPlan);
-
-        // Si era el último día → avanzar semana
-        final allDone = updatedPlan.days.values.every((d) => d.isSimulated);
-        if (allDone) {
-          state = state.copyWith(isSimulating: false);
-          await _advanceWeek(updatedPlan);
-          return; // ← cortar el loop, ya avanzamos
-        }
+        await simulateDay(day); // maneja fatiga, persiste y avanza semana si es el último
         continue;
       }
 

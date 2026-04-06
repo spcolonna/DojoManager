@@ -83,6 +83,30 @@ class SimulateDayUseCase {
           ? GenerateLearningCoefficients().execute(student.id)
           : student.learningCoefficients;
 
+      // Si no hay actividades → recuperación leve (-10 fatiga, sin XP ni PH)
+      if (activities.isEmpty && plan.type == DayType.training) {
+        for (final student in students) {
+          final newFatigue = (student.fatiguePercent - 18).clamp(0, 100);
+          final updated = student.copyWith(fatiguePercent: newFatigue);
+          await _repo.updateStudent(updated);
+          studentResults.add(StudentDayResult(
+            studentId: student.id,
+            studentName: student.nameKey,
+            phGained: 0,
+            xpGained: 0,
+            newFatigue: newFatigue,
+            statGains: {},
+            leveledUp: false,
+          ));
+        }
+        return DaySimulationResult(
+          day: plan.day,
+          studentResults: studentResults,
+          activitiesSimulated: [],
+          wasTournamentDay: false,
+        );
+      }
+
       for (final act in activities) {
         act.statBonus.forEach((stat, val) {
           final coeff = coefficients[stat] ?? 1.0;

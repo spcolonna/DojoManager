@@ -539,5 +539,10 @@
   "@tournamentFightScore": { "placeholders": { "blue": {"type": "String"}, "blueWins": {"type": "int"}, "redWins": {"type": "int"}, "red": {"type": "String"} } },
   "tournamentNextFighter": "Next fighter",
   "tournamentRoundTimer": "Round {round} · {seconds}s",
-  "@tournamentRoundTimer": { "placeholders": { "round": {"type": "int"}, "seconds": {"type": "int"} } }
+  "@tournamentRoundTimer": { "placeholders": { "round": {"type": "int"}, "seconds": {"type": "int"} } },
+
+  "beltUpTitle": "{name} ranked up!",
+  "@beltUpTitle": { "placeholders": { "name": { "type": "String" } } },
+  "beltUpWarning": "Points accumulated in the tournament for the previous category are lost. From now on they will compete in the new category.",
+  "beltUpConfirm": "UNDERSTOOD"
 }

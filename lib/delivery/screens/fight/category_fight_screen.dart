@@ -292,7 +292,7 @@ class _BetweenFightsScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
-                    loc.tournamentNextMatch,
+                    loc.tournamentNextFighter,
                     style: GoogleFonts.rajdhani(
                         fontSize: 14, fontWeight: FontWeight.w800,
                         letterSpacing: 1),

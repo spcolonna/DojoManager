@@ -151,6 +151,15 @@ class TrainingScreen extends ConsumerWidget {
                   .simulateDay(day);
 
               if (result != null && context.mounted) {
+                final levelUps = result.studentResults
+                    .where((r) => r.leveledUp)
+                    .toList();
+
+                for (final levelUp in levelUps) {
+                  if (!context.mounted) break;
+                  await _showBeltUpDialog(context, levelUp);
+                }
+                
                 final total = result.studentResults.fold(0, (s, r) => s + r.phGained);
                 if (total > 0) {
                   FloatLabel.show(context, '+$total PH', color: AppColors.goldPrimary);
@@ -163,6 +172,79 @@ class TrainingScreen extends ConsumerWidget {
             onGoToTournament: () {
               ref.read(navigationProvider.notifier).state = 2;
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showBeltUpDialog(
+      BuildContext context, StudentDayResult result) async {
+    final loc = l10n(context);
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.bgElevated,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.workspace_premium_rounded,
+                color: AppColors.goldPrimary, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              loc.beltUpTitle(result.studentName),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.cinzelDecorative(
+                  fontSize: 16, fontWeight: FontWeight.bold,
+                  color: AppColors.goldLight),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.warning_rounded,
+                      color: AppColors.warning, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      loc.beltUpWarning,
+                      style: GoogleFonts.rajdhani(
+                          fontSize: 12, color: AppColors.warning,
+                          height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.goldPrimary,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(
+                  loc.beltUpConfirm,
+                  style: GoogleFonts.rajdhani(
+                      fontWeight: FontWeight.w800)),
+            ),
           ),
         ],
       ),

@@ -271,6 +271,8 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
 
     if (enrolledBelts.isEmpty) return;
 
+
+    final categoryResults = <CategoryFightResult>[];
     setState(() => _isSimulating = true);
 
     // Simular categoría por categoría secuencialmente
@@ -308,7 +310,7 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
           rivalTeamName: rival.teamName,
           playerStrategies: strategies,
           onComplete: (result) {
-            // Solo cuando el usuario toca "RECLAMAR" → cerramos
+            categoryResults.add(result);
             Navigator.of(context).pop();
             completer.complete();
           },
@@ -331,10 +333,9 @@ class _NextMatchTabState extends ConsumerState<NextMatchTab> {
       playerFighters: _enrolledByBelt.values
           .expand((ids) => students.where((s) => ids.contains(s.id)))
           .toList(),
-      playerStrategies: _strategiesByBelt.values
-          .expand((s) => s)
-          .toList(),
+      playerStrategies: _strategiesByBelt.values.expand((s) => s).toList(),
       enrolledByBelt: _enrolledByBelt,
+      categoryResults: categoryResults,
     );
 
     ref

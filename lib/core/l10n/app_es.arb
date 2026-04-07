@@ -538,5 +538,10 @@
   "@tournamentFightScore": { "placeholders": { "blue": {"type": "String"}, "blueWins": {"type": "int"}, "redWins": {"type": "int"}, "red": {"type": "String"} } },
   "tournamentNextFighter": "Próximo luchador",
   "tournamentRoundTimer": "Round {round} · {seconds}s",
-  "@tournamentRoundTimer": { "placeholders": { "round": {"type": "int"}, "seconds": {"type": "int"} } }
+  "@tournamentRoundTimer": { "placeholders": { "round": {"type": "int"}, "seconds": {"type": "int"} } },
+
+  "beltUpTitle": "¡{name} subió de faja!",
+  "@beltUpTitle": { "placeholders": { "name": { "type": "String" } } },
+  "beltUpWarning": "Los puntos acumulados en el torneo para su categoría anterior se pierden. A partir de ahora competirá en la nueva categoría.",
+  "beltUpConfirm": "ENTENDIDO"
 }

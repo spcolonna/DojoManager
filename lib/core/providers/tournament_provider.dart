@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../delivery/screens/fight/category_fight_screen.dart';
 import '../../domain/entities/ai/ai_opponent.dart';
 import '../../domain/entities/fight.dart';
 import '../../domain/entities/tournament/tournament.dart';
@@ -148,6 +149,7 @@ class TournamentNotifier extends StateNotifier<Tournament?> {
     required List<dynamic> playerFighters,
     required List<FightStrategy> playerStrategies,
     Map<int, List<String>> enrolledByBelt = const {},
+    List<CategoryFightResult> categoryResults = const [],
   }) async {
     final match = nextPlayerMatch;
     if (match == null || state == null) return null;
@@ -170,6 +172,7 @@ class TournamentNotifier extends StateNotifier<Tournament?> {
 
     final seed = DateTime.now().millisecondsSinceEpoch;
 
+    // ── Simular partido del jugador ───────────────────────────────────────────
     final result = _simulator.execute(
       match: match,
       homeFighters: homeFighters,
@@ -181,41 +184,130 @@ class TournamentNotifier extends StateNotifier<Tournament?> {
       seed: seed,
     );
 
-    final updated = _processor.execute(
+    var current = _processor.execute(
       tournament: state!,
       playedMatch: result.match,
     );
 
-    state = updated;
+    // ── Simular partidos AI vs AI de la misma fecha ───────────────────────────
+    final playerRound      = match.round;
+    final remainingMatches = current.matches.where((m) =>
+    !m.isPlayed &&
+        m.round == playerRound &&
+        m.homeTeamId != playerTeamId &&
+        m.awayTeamId != playerTeamId,
+    ).toList();
 
-    // Persistir partido jugado
+    for (final aiMatch in remainingMatches) {
+      final home = _aiOpponents
+          .where((o) => o.id == aiMatch.homeTeamId)
+          .firstOrNull;
+      final away = _aiOpponents
+          .where((o) => o.id == aiMatch.awayTeamId)
+          .firstOrNull;
+      if (home == null || away == null) continue;
+
+      final aiResult = _simulator.execute(
+        match: aiMatch,
+        homeFighters: home.fighters,
+        awayFighters: away.fighters,
+        homeStyleId: home.styleId,
+        awayStyleId: away.styleId,
+        homeStrategies: [],
+        awayStrategies: [],
+        seed: seed + aiMatch.hashCode,
+      );
+
+      current = _processor.execute(
+        tournament: current,
+        playedMatch: aiResult.match,
+      );
+    }
+
+    state = current;
+
+    // ── Persistir en Firestore ────────────────────────────────────────────────
     final dojo = await _ref.read(dojoProvider.future);
     if (dojo != null) {
-      final repo = FirebaseDojoRepository();
+      final repo  = FirebaseDojoRepository();
       final saved = await repo.getTournamentState(dojo.id) ?? {};
+
+      // Acumular puntos por categoría
+      final categoryPoints = Map<String, int>.from(
+        (saved['categoryPoints'] as Map? ?? {}).map(
+              (k, v) => MapEntry(k.toString(), (v as num).toInt()),
+        ),
+      );
+      final categoryMatches = Map<String, int>.from(
+        (saved['categoryMatches'] as Map? ?? {}).map(
+              (k, v) => MapEntry(k.toString(), (v as num).toInt()),
+        ),
+      );
+
+      int totalPoints = (saved['totalPoints'] as num? ?? 0).toInt();
+
+      for (final cr in categoryResults) {
+        final key = cr.beltLevel.toString();
+        categoryPoints[key]  = (categoryPoints[key]  ?? 0) + cr.pointsEarned;
+        categoryMatches[key] = (categoryMatches[key] ?? 0) + 1;
+        totalPoints += cr.pointsEarned;
+      }
+
+      // Partidos jugados — incluye el del jugador y los AI vs AI
       final playedMatches = List<Map>.from(saved['playedMatches'] ?? []);
+
+      // Partido del jugador
       playedMatches.add({
-        'matchId': result.match.id,
-        'homeTeamId': result.match.homeTeamId,
-        'awayTeamId': result.match.awayTeamId,
-        'homePoints': result.match.homePoints,
-        'awayPoints': result.match.awayPoints,
-        'result': result.match.result?.name ?? 'draw',
-        'isPlayed': true,
+        'matchId':     result.match.id,
+        'homeTeamId':  result.match.homeTeamId,
+        'awayTeamId':  result.match.awayTeamId,
+        'homePoints':  result.match.homePoints,
+        'awayPoints':  result.match.awayPoints,
+        'result':      result.match.result?.name ?? 'draw',
+        'isPlayed':    true,
+        'categoryResults': categoryResults.map((cr) => {
+          'beltLevel':    cr.beltLevel,
+          'playerWon':    cr.playerWon,
+          'playerFights': cr.playerFights,
+          'rivalFights':  cr.rivalFights,
+          'pointsEarned': cr.pointsEarned,
+        }).toList(),
       });
+
+      // Partidos AI vs AI
+      for (final aiMatch in remainingMatches) {
+        final played = current.matches
+            .where((m) => m.id == aiMatch.id)
+            .firstOrNull;
+        if (played == null) continue;
+        playedMatches.add({
+          'matchId':    played.id,
+          'homeTeamId': played.homeTeamId,
+          'awayTeamId': played.awayTeamId,
+          'homePoints': played.homePoints,
+          'awayPoints': played.awayPoints,
+          'result':     played.result?.name ?? 'draw',
+          'isPlayed':   true,
+        });
+      }
+
       await repo.saveTournamentState(dojo.id, {
-        'season': dojo.currentSeason,
-        'week': dojo.currentWeek,
-        'styleId': dojo.styleId,
-        'status': 'active',
-        'playedMatches': playedMatches,
+        'season':          dojo.currentSeason,
+        'week':            dojo.currentWeek,
+        'styleId':         dojo.styleId,
+        'status':          'active',
+        'totalPoints':     totalPoints,
+        'categoryPoints':  categoryPoints,
+        'categoryMatches': categoryMatches,
+        'playedMatches':   playedMatches,
       });
 
       // Apagar flag si el jugador terminó todos sus partidos
-      final allPlayed = updated.playerMatches.every((m) => m.isPlayed);
+      final allPlayed = current.playerMatches.every((m) => m.isPlayed);
       if (allPlayed) {
         await repo.updateDojo(dojo.copyWith(tournamentActive: false));
       }
+
       _ref.invalidate(dojoProvider);
     }
 
